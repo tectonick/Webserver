@@ -6,11 +6,12 @@ using System.Threading.Tasks;
 
 namespace Webserver
 {
-    class HTTPResponse:HTTPObject
+    class HTTPResponse
     {
         static Dictionary<string, string> StatusCodes = new Dictionary<string, string>()
         {
             { "200", "OK"},
+            { "400", "Bad Request" },
             { "404",  "Not found"},
             { "500",  "Server error"}
         };
@@ -41,17 +42,34 @@ namespace Webserver
         public string Status { get => _status; }
         public string Version { get; set; } = "HTTP/1.1";
         public Dictionary<string, string> Headers { get; set; } = new Dictionary<string, string>();
-        public string Body { get; set; }
+        public byte[] Body { get; set; }
+
 
         public override string ToString()
         {
-            string result = Version  + " " + StatusCode + " " + Status + "\n";
+            string result = Version  + " " + StatusCode + " " + Status + "\r\n";
             foreach (var item in Headers)
             {
-                result += item.Key + ": " + item.Value + "\n";
+                result += item.Key + ": " + item.Value + "\r\n";
             }
-            result += "\n";
-            result += Body;
+            result += "\r\n";
+            result += Encoding.ASCII.GetString(Body);
+            return result;
+        }
+
+        public byte[] ToBinary()
+        {
+            string textResult = Version + " " + StatusCode + " " + Status + "\r\n";
+            foreach (var item in Headers)
+            {
+                textResult += item.Key + ": " + item.Value + "\r\n";
+            }
+            textResult += "\r\n";
+            byte[] byteTextResult = Encoding.ASCII.GetBytes(textResult);
+
+            var result = new byte[byteTextResult.Length + Body.Length];
+            byteTextResult.CopyTo(result, 0);
+            Body.CopyTo(result, byteTextResult.Length);
             return result;
         }
     }

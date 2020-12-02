@@ -17,7 +17,7 @@ namespace Webserver
         private TcpListener _server = null;
         public int Port { get; set; } = 8080;
         public IPAddress Address { get; set; } = IPAddress.Parse("127.0.0.1");
-        Byte[] bytes = new Byte[2048];
+        Byte[] bytes = new Byte[4096];
         public string WebRoot { get; set; } = "/";
         public Server(IPAddress addr, int port, string root)
         {
@@ -55,8 +55,10 @@ namespace Webserver
                         data = null;
                         NetworkStream stream = client.GetStream();
                         int i;
-
-                        i = stream.Read(bytes, 0, bytes.Length);
+                        HTTPResponse response = new HTTPResponse();
+                        try
+                        {
+                            i = stream.Read(bytes, 0, bytes.Length);
 
                         data = System.Text.Encoding.ASCII.GetString(bytes, 0, i);
                         Console.WriteLine("_{0}_ Received: {1}", seq, data);
@@ -64,25 +66,59 @@ namespace Webserver
                         //Parse request
                         HTTPRequest request = new HTTPRequest(data);
 
-                        string pathToFile = request.Path;
-                        if (pathToFile[pathToFile.Length-1]=='/')
-                        {
-                            pathToFile += "index.html";
+                       
+                        //TODO parse file types
+
+                            string pathToFile = request.Path;
+                            if (pathToFile[pathToFile.Length - 1] == '/')
+                            {
+                                pathToFile += "index.html";
+                            }
+
+                            pathToFile = pathToFile.Substring(1, pathToFile.Length - 1);
+                            byte[] bodyData= File.ReadAllBytes(Path.Combine(WebRoot, pathToFile));
+                            
+
+                            //TODO Move to another class and add type parsing
+                            if (pathToFile.IndexOf(".jpg") >= 0)
+                            {
+                                response.Headers.Add("Content-Type", "image/jpg");
+                                response.Headers.Add("Content-Length", bodyData.Length.ToString());                                
+                            }
+
+
+                            response.Body = bodyData;
+                            response.StatusCode = "200";
+
                         }
-                        pathToFile = pathToFile.Substring(1, pathToFile.Length - 1);
-                        string fileBody = File.ReadAllText(Path.Combine(WebRoot, pathToFile)); ///TEST
+                        catch(ArgumentException)
+                        {
+                            response.StatusCode = "400";
+                        }
+                        catch (FileNotFoundException)
+                        {
+                            response.StatusCode = "404";
+                        }
+                        catch(Exception)
+                        {
+                            response.StatusCode = "500";
+                        }
+                        response.Headers.Add("Host", "localhost:8080");
 
                         // TODO Fill response
-                        HTTPResponse response = new HTTPResponse();
-                        response.StatusCode = "200";
-                        response.Headers.Add("Host", "localhost:8080");
-                        response.Body = fileBody;
+
+
 
                         // Send back a response
                         data = response.ToString();
-                        byte[] msg = System.Text.Encoding.ASCII.GetBytes(data);
-                        stream.Write(msg, 0, msg.Length);
+
+                        //byte[] msg = System.Text.Encoding.ASCII.GetBytes(data);
+                        //stream.Write(msg, 0, msg.Length);
+
+                        byte[] byteData = response.ToBinary();
+                        stream.Write(byteData, 0, byteData.Length);
                         Console.WriteLine("_{0}_ Sent: \n{1}", seq, data);
+                        stream.Close();
                         seq++;
                   
                     } 

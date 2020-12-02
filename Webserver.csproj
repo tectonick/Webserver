@@ -53,7 +53,6 @@
     <Compile Include="Form1.Designer.cs">
       <DependentUpon>Form1.cs</DependentUpon>
     </Compile>
-    <Compile Include="HTTPObject.cs" />
     <Compile Include="HTTPRequest.cs" />
     <Compile Include="HTTPResponse.cs" />
     <Compile Include="Program.cs" />
