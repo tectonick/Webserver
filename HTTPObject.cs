@@ -8,6 +8,7 @@ namespace Webserver
 {
     interface HTTPObject
     {
-        HTTPObject Parse();
+        Dictionary<string,string> Headers { get; set; }
+        string Body { get; set; }
     }
 }

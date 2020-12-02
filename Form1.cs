@@ -21,6 +21,9 @@ namespace Webserver
         {
             stopButton.Enabled = true;
             startButton.Enabled = false;
+
+            Server server = new Server(System.Net.IPAddress.Parse("127.0.0.1"),8080,webRootInput.Text);
+            server.Start();
         }
 
         private void trayMenu_Click(object sender, EventArgs e)
@@ -59,6 +62,12 @@ namespace Webserver
         {
             startButton.Enabled = true;
             stopButton.Enabled = false;
+        }
+
+        private void chooseFolderButton_Click(object sender, EventArgs e)
+        {
+            webRootBrowserDialog.ShowDialog();
+            webRootInput.Text = webRootBrowserDialog.SelectedPath;
         }
     }
 }
