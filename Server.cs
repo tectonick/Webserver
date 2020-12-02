@@ -6,6 +6,8 @@ using System.Threading.Tasks;
 using System.IO;
 using System.Net;
 using System.Net.Sockets;
+using System.Timers;
+using System.Diagnostics;
 
 namespace Webserver
 {
@@ -15,9 +17,8 @@ namespace Webserver
         private TcpListener _server = null;
         public int Port { get; set; } = 8080;
         public IPAddress Address { get; set; } = IPAddress.Parse("127.0.0.1");
-        Byte[] bytes = new Byte[256];
+        Byte[] bytes = new Byte[2048];
         public string WebRoot { get; set; } = "/";
-
         public Server(IPAddress addr, int port, string root)
         {
             Port = port;
@@ -36,6 +37,7 @@ namespace Webserver
                 _server.Start();
                 String data = null;
                 Console.WriteLine($"Server started on {Address}:{Port} with root at {WebRoot}");
+                int seq = 0;
                 //Listening loop
                 while (true)
                 {
@@ -48,33 +50,41 @@ namespace Webserver
                     else
                     {
                         TcpClient client = _server.AcceptTcpClient();
-                        Console.WriteLine("Connected!");
+                            
+                        //Console.WriteLine("Connected!");
                         data = null;
                         NetworkStream stream = client.GetStream();
                         int i;
-                        while ((i = stream.Read(bytes, 0, bytes.Length)) != 0)
+
+                        i = stream.Read(bytes, 0, bytes.Length);
+
+                        data = System.Text.Encoding.ASCII.GetString(bytes, 0, i);
+                        Console.WriteLine("_{0}_ Received: {1}", seq, data);
+
+                        //Parse request
+                        HTTPRequest request = new HTTPRequest(data);
+
+                        string pathToFile = request.Path;
+                        if (pathToFile[pathToFile.Length-1]=='/')
                         {
-                            data = System.Text.Encoding.ASCII.GetString(bytes, 0, i);
-                            Console.WriteLine("Received: {0}", data);
-
-                            //Parse request
-                            HTTPRequest request = new HTTPRequest(data);
-                            //TODO Find files
-
-                            string fileBody=File.ReadAllText(Path.Combine(WebRoot, request.Path));
-                            
-                            // TODO Fill response
-                            HTTPResponse response = new HTTPResponse();
-                            response.StatusCode ="200";
-                            response.Body = fileBody;
-
-                            // Send back a response
-                            data =response.ToString();
-                            byte[] msg = System.Text.Encoding.ASCII.GetBytes(data);
-                            stream.Write(msg, 0, msg.Length);
-                            Console.WriteLine("Sent: {0}", data);
+                            pathToFile += "index.html";
                         }
-                        client.Close();
+                        pathToFile = pathToFile.Substring(1, pathToFile.Length - 1);
+                        string fileBody = File.ReadAllText(Path.Combine(WebRoot, pathToFile)); ///TEST
+
+                        // TODO Fill response
+                        HTTPResponse response = new HTTPResponse();
+                        response.StatusCode = "200";
+                        response.Headers.Add("Host", "localhost:8080");
+                        response.Body = fileBody;
+
+                        // Send back a response
+                        data = response.ToString();
+                        byte[] msg = System.Text.Encoding.ASCII.GetBytes(data);
+                        stream.Write(msg, 0, msg.Length);
+                        Console.WriteLine("_{0}_ Sent: \n{1}", seq, data);
+                        seq++;
+                  
                     } 
                         
                 }

@@ -88,6 +88,7 @@
             this.webRootInput.Name = "webRootInput";
             this.webRootInput.Size = new System.Drawing.Size(174, 20);
             this.webRootInput.TabIndex = 2;
+            this.webRootInput.Text = "C:\\Users\\korn9\\Desktop\\КСиС КП\\TestWebRoot";
             // 
             // stopButton
             // 

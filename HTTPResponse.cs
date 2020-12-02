@@ -45,7 +45,7 @@ namespace Webserver
 
         public override string ToString()
         {
-            string result = StatusCode + " " + Status + " " + Version + "\n";
+            string result = Version  + " " + StatusCode + " " + Status + "\n";
             foreach (var item in Headers)
             {
                 result += item.Key + ": " + item.Value + "\n";
