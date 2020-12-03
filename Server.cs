@@ -87,16 +87,12 @@ namespace Webserver
 
             string outputPHP = "";
             proc.Start();
-            //var streamWriter = proc.StandardInput;
-            //streamWriter.WriteLine(query);
-            //streamWriter.WriteLine("");
-            //streamWriter.Close();
 
             while (!proc.StandardOutput.EndOfStream)
             {
                 outputPHP += proc.StandardOutput.ReadLine();
             }
-            outputPHP = outputPHP.Substring(outputPHP.IndexOf('<'));
+            //outputPHP = outputPHP.Substring(outputPHP.IndexOf('<'));
             return outputPHP;
 
         }
@@ -111,6 +107,7 @@ namespace Webserver
             NetworkStream stream = client.GetStream();
             int requestLength;
             HTTPResponse response = new HTTPResponse();
+            response.StatusCode = "200";
             string delimiter = "______________________________________________________";
             try
             {
@@ -161,19 +158,40 @@ namespace Webserver
 
                 if (pathToFile.IndexOf(".php") >= 0)
                 {
+                    string phpOutput = "";
                     if (PHPFile==""||(!File.Exists(PHPFile)))
                     {
                         throw new FileNotFoundException();
                     }
                     if (request.Method=="POST")
                     {
-                        bodyData = Encoding.ASCII.GetBytes(HandlePost(pathToFile, request.Body));
+                        phpOutput = HandlePost(pathToFile, request.Body);
                     }
                     else
                     {
-                        bodyData = Encoding.ASCII.GetBytes(HandleGet(pathToFile, request.Query));
+                        phpOutput = HandleGet(pathToFile, request.Query);
                     }
-                    
+
+                    string headers = "";
+                    int beginOfBody = phpOutput.IndexOf('<');
+                    if (beginOfBody>=0)
+                    {
+                        bodyData = Encoding.ASCII.GetBytes(phpOutput.Substring(beginOfBody));
+                        headers = phpOutput.Substring(0, beginOfBody);
+                    }
+                    else
+                    {
+                        headers = phpOutput;
+                    }
+                    if (headers.IndexOf("Status: 302")>=0)
+                    {
+                        int locationIndex=headers.IndexOf("location:")+"location:".Length;
+                        int endOfLocationIndex = headers.IndexOf("Content-type:");
+                        string location = headers.Substring(locationIndex, endOfLocationIndex-locationIndex);
+                        response.Headers.Add("location", location);
+                        response.StatusCode = "302";
+                    }
+
                 }
 
                 //TODO Move to another class and add type parsing
@@ -186,7 +204,7 @@ namespace Webserver
 
 
                 response.Body = bodyData;
-                response.StatusCode = "200";
+                
 
             }
             catch (ArgumentException)

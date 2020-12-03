@@ -11,6 +11,7 @@ namespace Webserver
         static Dictionary<string, string> StatusCodes = new Dictionary<string, string>()
         {
             { "200", "OK"},
+            { "302", "Redirect"},
             { "400", "Bad Request" },
             { "404",  "Not found"},
             { "500",  "Server error"}
