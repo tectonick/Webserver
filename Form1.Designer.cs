@@ -134,7 +134,7 @@
             this.pathToPHPInput.Name = "pathToPHPInput";
             this.pathToPHPInput.Size = new System.Drawing.Size(252, 20);
             this.pathToPHPInput.TabIndex = 5;
-            this.pathToPHPInput.Text = "C:\\php\\php.exe";
+            this.pathToPHPInput.Text = "C:\\php\\php-cgi.exe";
             // 
             // choosePHPFolderButton
             // 
@@ -151,9 +151,9 @@
             this.pathToPHPLabel.AutoSize = true;
             this.pathToPHPLabel.Location = new System.Drawing.Point(3, 71);
             this.pathToPHPLabel.Name = "pathToPHPLabel";
-            this.pathToPHPLabel.Size = new System.Drawing.Size(82, 13);
+            this.pathToPHPLabel.Size = new System.Drawing.Size(99, 13);
             this.pathToPHPLabel.TabIndex = 7;
-            this.pathToPHPLabel.Text = "Path to php.exe";
+            this.pathToPHPLabel.Text = "Path to php-cgi.exe";
             // 
             // configurationLabel
             // 

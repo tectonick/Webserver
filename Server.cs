@@ -31,6 +31,48 @@ namespace Webserver
         public Server()
         {
         }
+
+        string HandlePost(string pathToFile, string query)
+        {
+            if (PHPFile == "" || (!File.Exists(PHPFile)))
+            {
+                throw new FileNotFoundException();
+            }
+
+            ProcessStartInfo StartInfo = new ProcessStartInfo
+            {
+                FileName = PHPFile,
+                UseShellExecute = false,
+                RedirectStandardOutput = true,
+                CreateNoWindow = true,
+                RedirectStandardInput = true
+            };
+            StartInfo.EnvironmentVariables.Add("REQUEST_METHOD", "POST");
+            StartInfo.EnvironmentVariables.Add("CONTENT_LENGTH", "1234");
+            StartInfo.EnvironmentVariables.Add("SCRIPT_FILENAME", pathToFile);
+            StartInfo.EnvironmentVariables.Add("REDIRECT_STATUS", "CGI");
+            StartInfo.EnvironmentVariables.Add("CONTENT_TYPE", "application/x-www-form-urlencoded");
+            Process proc = new Process();
+            proc.StartInfo = StartInfo;
+
+            string outputPHP = "";
+            proc.Start();
+            var streamWriter = proc.StandardInput;
+            streamWriter.WriteLine(query);
+            streamWriter.WriteLine("");
+            streamWriter.Close();
+
+
+
+            while (!proc.StandardOutput.EndOfStream)
+            {
+                outputPHP += proc.StandardOutput.ReadLine();
+            }
+            outputPHP = outputPHP.Substring(outputPHP.IndexOf('<'));
+            return outputPHP;
+            
+        }
+
         void ServeClient()
         {
             TcpClient client = _server.AcceptTcpClient();
@@ -90,30 +132,11 @@ namespace Webserver
 
                 if (pathToFile.IndexOf(".php") >= 0)
                 {
-                    if (PHPFile=="")
+                    if (PHPFile==""||(!File.Exists(PHPFile)))
                     {
                         throw new FileNotFoundException();
                     }
-                    Process proc = new Process
-                    {
-                        StartInfo = new ProcessStartInfo
-                        {
-                            FileName = PHPFile,
-                            Arguments = "-f \""+ pathToFile+"\"",
-                            UseShellExecute = false,
-                            RedirectStandardOutput = true,
-                            CreateNoWindow = true
-                        }
-                    };
-
-                    proc.Start();
-                    string outputPHP = "";
-                    while (!proc.StandardOutput.EndOfStream)
-                    {
-                        outputPHP+=proc.StandardOutput.ReadLine();
-                        
-                    }
-                    bodyData = Encoding.ASCII.GetBytes(outputPHP);
+                    bodyData = Encoding.ASCII.GetBytes(HandlePost(pathToFile, "fname=Kolya&fname2=SADMASDMADMSA"));
                 }
 
                 //TODO Move to another class and add type parsing
