@@ -19,24 +19,26 @@ namespace Webserver
             InitializeComponent();
         }
 
-        private void startButton_Click(object sender, EventArgs e)
+        void Log(string data)
         {
-            stopButton.Enabled = true;
-            startButton.Enabled = false;
+            this.Invoke(new MethodInvoker(delegate ()
+            {
+                logBox.Text += data+"\r\n\r\n";
 
-            
-            Server server = new Server(System.Net.IPAddress.Parse("127.0.0.1"),8080,webRootInput.Text);
-            server.PHPFile = pathToPHPInput.Text;
-            ThreadStart threadStart = new ThreadStart(server.Start);
-            
-            serverThread = new Thread(threadStart);
-            serverThread.Start();
-            //server.Start();
+            }));            
         }
 
-        private void trayMenu_Click(object sender, EventArgs e)
+        private void startButton_Click(object sender, EventArgs e)
         {
-            
+            Server server = new Server(System.Net.IPAddress.Parse("127.0.0.1"),8080,webRootInput.Text);
+            server.PHPFile = pathToPHPInput.Text;
+            server.Log = this.Log;
+            ThreadStart threadStart = new ThreadStart(server.Start);
+            serverThread = new Thread(threadStart);
+            serverThread.Start();
+
+            stopButton.Enabled = true;
+            startButton.Enabled = false;
         }
 
         private void trayMenu_ItemClicked(object sender, ToolStripItemClickedEventArgs e)

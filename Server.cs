@@ -14,25 +14,71 @@ namespace Webserver
 {
     class Server
     {
-        int requestNumber = 0;
-        List<string> defaultFiles = new List<string>{ Path.Combine(".","index.html"), Path.Combine(".","index.htm"), Path.Combine(".","index.php"),"" };
-        List<string> defaultExtensions = new List<string> { ".html", ".htm", ".php", "" };
-        private TcpListener _server = null;
         public int Port { get; set; } = 8080;
         public IPAddress Address { get; set; } = IPAddress.Parse("127.0.0.1");
         public string WebRoot { get; set; } = "/";
         public string PHPFile { get; set; } = "";
+
+        public delegate void Loggger(string data);
+        public Loggger Log;
         public Server(IPAddress addr, int port, string root)
         {
             Port = port;
             Address = addr;
             WebRoot = root;
         }
-        public Server()
+        public Server() { }
+        public void Start()
         {
+            try
+            {
+                _server = new TcpListener(Address, Port);
+                _server.Start();
+                Log($"Server started on {Address}:{Port} with root at {WebRoot}");
+
+                //Listening loop
+                while (true)
+                {
+                    if (_server.Pending())
+                    {
+                        ThreadStart threadStart = new ThreadStart(this.ServeClient);
+                        Thread clientThread = new Thread(threadStart);
+                        clientThread.Start();
+                    }
+                }
+            }
+            catch (SocketException e)
+            {
+                Log($"SocketException: {e}");
+                Console.WriteLine();
+            }
+            catch (ThreadAbortException e)
+            {
+                Log("Server thread aborted");
+            }
+            catch (Exception e)
+            {
+
+            }
+            finally
+            {
+                Log("Server stopped");
+                this.Stop();
+            }
         }
 
-        string HandlePost(string pathToFile, string query)
+        public void Stop()
+        {
+            _server.Stop();
+        }
+
+
+        private readonly int BUFFER_SIZE = 8192;
+        private readonly List<string> DEFAULTFILES = new List<string>{ Path.Combine(".","index.html"), Path.Combine(".","index.htm"), Path.Combine(".","index.php"),"" };
+        private readonly List<string> DEFAULTEXTENSIONS = new List<string> { ".html", ".htm", ".php", "" };
+        private TcpListener _server = null;
+
+        private string HandlePost(string pathToFile, string query)
         {
             ProcessStartInfo StartInfo = new ProcessStartInfo
             {
@@ -49,25 +95,21 @@ namespace Webserver
             StartInfo.EnvironmentVariables.Add("CONTENT_TYPE", "application/x-www-form-urlencoded");
             Process proc = new Process();
             proc.StartInfo = StartInfo;
-
             string outputPHP = "";
             proc.Start();
             var streamWriter = proc.StandardInput;
             streamWriter.WriteLine(query);
             streamWriter.WriteLine("");
             streamWriter.Close();
-
             while (!proc.StandardOutput.EndOfStream)
             {
                 outputPHP += proc.StandardOutput.ReadLine();
             }
             outputPHP = outputPHP.Substring(outputPHP.IndexOf('<'));
-            return outputPHP;
-            
+            return outputPHP;            
         }
 
-
-        string HandleGet(string pathToFile, string query)
+        private string HandleGet(string pathToFile, string query)
         {
             ProcessStartInfo StartInfo = new ProcessStartInfo
             {
@@ -84,128 +126,131 @@ namespace Webserver
             StartInfo.EnvironmentVariables.Add("CONTENT_TYPE", "application/x-www-form-urlencoded");
             Process proc = new Process();
             proc.StartInfo = StartInfo;
-
             string outputPHP = "";
             proc.Start();
-
             while (!proc.StandardOutput.EndOfStream)
             {
                 outputPHP += proc.StandardOutput.ReadLine();
             }
-            //outputPHP = outputPHP.Substring(outputPHP.IndexOf('<'));
             return outputPHP;
-
         }
 
-
-        void ServeClient()
+        private string CheckAndParseFilename(string requestPath)
         {
-            TcpClient client = _server.AcceptTcpClient();
-            Byte[] buffer = new Byte[4096];
-            String data = null;
-            data = null;
-            NetworkStream stream = client.GetStream();
-            int requestLength;
-            HTTPResponse response = new HTTPResponse();
-            response.StatusCode = "200";
-            string delimiter = "______________________________________________________";
-            try
+            string pathToFile = requestPath;
+            string opt = "";
+            pathToFile = pathToFile.Substring(1, pathToFile.Length - 1);
+            bool isExtensionOmitted = false;
+            if (!File.Exists(Path.Combine(WebRoot, pathToFile)))
             {
-                requestLength = stream.Read(buffer, 0, buffer.Length);
-
-                data = System.Text.Encoding.ASCII.GetString(buffer, 0, requestLength);
-                
-                Console.WriteLine("{2}\r\n_{0}_ Received: {1}\r\n{2}", requestNumber, data,delimiter);
-
-                //Parse request
-                HTTPRequest request = new HTTPRequest(data);
-
-                //TODO parse file types
-
-                string pathToFile = request.Path;
-                string opt = "";
-                pathToFile = pathToFile.Substring(1, pathToFile.Length - 1);
-
-
-                bool isExtensionOmitted = false;
-                if (!File.Exists(Path.Combine(WebRoot, pathToFile)))
+                //Try interpret path as folder name
+                foreach (var item in DEFAULTFILES)
                 {
-                    //Try interpret path as folder name
-                    foreach (var item in defaultFiles)
+                    opt = item;
+                    if (File.Exists(Path.Combine(WebRoot, pathToFile, opt))) break;
+                }
+                //Try interpret path as filename with omitted extension
+                if (opt == "")
+                {
+                    foreach (var item in DEFAULTEXTENSIONS)
                     {
                         opt = item;
-                        if (File.Exists(Path.Combine(WebRoot, pathToFile,opt))) break;
-                    }
-                    //Try interpret path as filename with omitted extension
-                    if (opt == "")
-                    {
-                        foreach (var item in defaultExtensions)
+                        if (File.Exists(Path.Combine(WebRoot, pathToFile + opt)))
                         {
-                            opt = item;
-                            if (File.Exists(Path.Combine(WebRoot, pathToFile + opt)))
-                            {
-                                isExtensionOmitted = true;
-                                break;
-                            }
+                            isExtensionOmitted = true;
+                            break;
                         }
                     }
                 }
+            }
+            return (isExtensionOmitted) ? Path.Combine(WebRoot, pathToFile + opt) : Path.Combine(WebRoot, pathToFile, opt);
+        }
 
-                pathToFile = (isExtensionOmitted) ? Path.Combine(WebRoot, pathToFile + opt) : Path.Combine(WebRoot, pathToFile, opt);
+        private void handlePHP(HTTPRequest request, HTTPResponse response, string pathToFile) {
+            string phpOutput = "";
+            if (PHPFile == "" || (!File.Exists(PHPFile)))
+            {
+                throw new FileNotFoundException();
+            }
+            if (request.Method == "POST")
+            {
+                phpOutput = HandlePost(pathToFile, request.Body);
+            }
+            else
+            {
+                phpOutput = HandleGet(pathToFile, request.Query);
+            }
 
-                byte[] bodyData = File.ReadAllBytes(pathToFile);
+            string headers = "";
+            int beginOfBody = phpOutput.IndexOf('<');
+            if (beginOfBody >= 0)
+            {
+                response.Body = Encoding.ASCII.GetBytes(phpOutput.Substring(beginOfBody));
+                headers = phpOutput.Substring(0, beginOfBody);
+            }
+            else
+            {
+                headers = phpOutput;
+            }
+            if (headers.IndexOf("Status: 302") >= 0)
+            {
+                int locationIndex = headers.IndexOf("location:") + "location:".Length;
+                int endOfLocationIndex = headers.IndexOf("Content-type:");
+                string location = headers.Substring(locationIndex, endOfLocationIndex - locationIndex);
+                response.Headers.Add("location", location);
+                response.StatusCode = "302";
+            }
+        }
+        private void handleJPG(HTTPRequest request, HTTPResponse response, string pathToFile) {
+            response.Body = File.ReadAllBytes(pathToFile);
+            response.Headers.Add("Content-Type", "image/jpg");
+            response.Headers.Add("Content-Length", response.Body.Length.ToString());
+            response.isBodyBinary = true;
+        }
 
+        private void handleText(HTTPRequest request, HTTPResponse response, string pathToFile)
+        {
+            response.Body=File.ReadAllBytes(pathToFile);
+        }
 
+        private void ServeClient()
+        {
+            TcpClient client;
+            try
+            {
+                client = _server.AcceptTcpClient();
+            }
+            catch (Exception)
+            {
+                return;
+            }
+            Byte[] buffer = new Byte[BUFFER_SIZE];
+            NetworkStream stream = client.GetStream();
+            HTTPResponse response = new HTTPResponse();
+            response.StatusCode = "200";
+            try
+            {
+                //Get client request
+                int requestLength = stream.Read(buffer, 0, buffer.Length);
+                string rawRequest = System.Text.Encoding.ASCII.GetString(buffer, 0, requestLength);
+                Log($"[{Thread.CurrentThread.ManagedThreadId}] Server received:\r\n{rawRequest}");
+                
+                //Parse request
+                HTTPRequest request = new HTTPRequest(rawRequest);
+                //Check filename and fill missing extensions or names
+                string pathToFile = CheckAndParseFilename(request.Path);
+                // Handle filetypes
                 if (pathToFile.IndexOf(".php") >= 0)
                 {
-                    string phpOutput = "";
-                    if (PHPFile==""||(!File.Exists(PHPFile)))
-                    {
-                        throw new FileNotFoundException();
-                    }
-                    if (request.Method=="POST")
-                    {
-                        phpOutput = HandlePost(pathToFile, request.Body);
-                    }
-                    else
-                    {
-                        phpOutput = HandleGet(pathToFile, request.Query);
-                    }
-
-                    string headers = "";
-                    int beginOfBody = phpOutput.IndexOf('<');
-                    if (beginOfBody>=0)
-                    {
-                        bodyData = Encoding.ASCII.GetBytes(phpOutput.Substring(beginOfBody));
-                        headers = phpOutput.Substring(0, beginOfBody);
-                    }
-                    else
-                    {
-                        headers = phpOutput;
-                    }
-                    if (headers.IndexOf("Status: 302")>=0)
-                    {
-                        int locationIndex=headers.IndexOf("location:")+"location:".Length;
-                        int endOfLocationIndex = headers.IndexOf("Content-type:");
-                        string location = headers.Substring(locationIndex, endOfLocationIndex-locationIndex);
-                        response.Headers.Add("location", location);
-                        response.StatusCode = "302";
-                    }
-
-                }
-
-                //TODO Move to another class and add type parsing
+                    handlePHP(request, response, pathToFile);
+                } else
                 if (pathToFile.IndexOf(".jpg") >= 0)
                 {
-                    response.Headers.Add("Content-Type", "image/jpg");
-                    response.Headers.Add("Content-Length", bodyData.Length.ToString());
-                    response.isBodyBinary = true;
+                    handleJPG(request, response, pathToFile);
+                } else
+                {
+                    handleText(request, response, pathToFile);
                 }
-
-
-                response.Body = bodyData;
-                
-
             }
             catch (ArgumentException)
             {
@@ -219,53 +264,14 @@ namespace Webserver
             {
                 response.StatusCode = "500";
             }
-            response.Headers.Add("Host", "localhost:8080");
-            data = response.ToString();
-
-            byte[] byteData = response.ToBinary();
-            stream.Write(byteData, 0, byteData.Length);
-            Console.WriteLine("{2}\r\n_{0}_ Sent: \n{1} \r\n{2}", requestNumber, data, delimiter);
+            response.Headers.Add("Host", $"{Address.ToString()}:{Port}");            
+            byte[] readyResponse = response.ToBinary();
+            stream.Write(readyResponse, 0, readyResponse.Length);
             stream.Close();
-            requestNumber++;
+
+            Log($"[{Thread.CurrentThread.ManagedThreadId}] Server sent:\r\n{response.ToString()}");
         }
 
-        public void Start()
-        {            
-            try
-            {
-                _server = new TcpListener(Address, Port);
-                _server.Start();
-                Console.WriteLine($"Server started on {Address}:{Port} with root at {WebRoot}");
-                //Listening loop
-                while (true)
-                { 
-                    if (_server.Pending())
-                    {
-                        ThreadStart threadStart = new ThreadStart(this.ServeClient);
-                        Thread clientThread = new Thread(threadStart);
-                        clientThread.Start();
-                    } 
-                }
-            }
-            catch (SocketException e)
-            {
-                Console.WriteLine("SocketException: {0}", e);
-            }
-            catch (ThreadAbortException e)
-            {
-                Console.WriteLine("Server thread aborted");                
-            }
-            finally
-            {
-                Console.WriteLine("Server stopped");
-                this.Stop();
-            }
-        }
 
-        public void Stop()
-        {
-            _server.Stop();
-        }
     }
-    
 }

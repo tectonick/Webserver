@@ -47,13 +47,15 @@
             this.configurationLabel = new System.Windows.Forms.Label();
             this.panel1 = new System.Windows.Forms.Panel();
             this.backgroundWorker1 = new System.ComponentModel.BackgroundWorker();
+            this.logBox = new System.Windows.Forms.TextBox();
+            this.contextMenuStrip1 = new System.Windows.Forms.ContextMenuStrip(this.components);
             this.trayMenu.SuspendLayout();
             this.panel1.SuspendLayout();
             this.SuspendLayout();
             // 
             // startButton
             // 
-            this.startButton.Location = new System.Drawing.Point(12, 23);
+            this.startButton.Location = new System.Drawing.Point(12, 12);
             this.startButton.Name = "startButton";
             this.startButton.Size = new System.Drawing.Size(141, 55);
             this.startButton.TabIndex = 0;
@@ -76,7 +78,6 @@
             this.trayMenu.Name = "trayMenu";
             this.trayMenu.Size = new System.Drawing.Size(104, 48);
             this.trayMenu.ItemClicked += new System.Windows.Forms.ToolStripItemClickedEventHandler(this.trayMenu_ItemClicked);
-            this.trayMenu.Click += new System.EventHandler(this.trayMenu_Click);
             // 
             // openTrayButton
             // 
@@ -101,7 +102,7 @@
             // stopButton
             // 
             this.stopButton.Enabled = false;
-            this.stopButton.Location = new System.Drawing.Point(159, 23);
+            this.stopButton.Location = new System.Drawing.Point(161, 12);
             this.stopButton.Name = "stopButton";
             this.stopButton.Size = new System.Drawing.Size(141, 55);
             this.stopButton.TabIndex = 0;
@@ -175,16 +176,31 @@
             this.panel1.Controls.Add(this.rootPathLabel);
             this.panel1.Controls.Add(this.choosePHPFolderButton);
             this.panel1.Controls.Add(this.pathToPHPInput);
-            this.panel1.Location = new System.Drawing.Point(12, 84);
+            this.panel1.Location = new System.Drawing.Point(12, 73);
             this.panel1.Name = "panel1";
             this.panel1.Size = new System.Drawing.Size(290, 118);
             this.panel1.TabIndex = 10;
+            // 
+            // logBox
+            // 
+            this.logBox.Location = new System.Drawing.Point(309, 13);
+            this.logBox.Multiline = true;
+            this.logBox.Name = "logBox";
+            this.logBox.ScrollBars = System.Windows.Forms.ScrollBars.Vertical;
+            this.logBox.Size = new System.Drawing.Size(477, 178);
+            this.logBox.TabIndex = 11;
+            // 
+            // contextMenuStrip1
+            // 
+            this.contextMenuStrip1.Name = "contextMenuStrip1";
+            this.contextMenuStrip1.Size = new System.Drawing.Size(61, 4);
             // 
             // Form1
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(314, 218);
+            this.ClientSize = new System.Drawing.Size(798, 204);
+            this.Controls.Add(this.logBox);
             this.Controls.Add(this.panel1);
             this.Controls.Add(this.stopButton);
             this.Controls.Add(this.startButton);
@@ -197,6 +213,7 @@
             this.panel1.ResumeLayout(false);
             this.panel1.PerformLayout();
             this.ResumeLayout(false);
+            this.PerformLayout();
 
         }
 
@@ -219,6 +236,8 @@
         private System.Windows.Forms.Label configurationLabel;
         private System.Windows.Forms.Panel panel1;
         private System.ComponentModel.BackgroundWorker backgroundWorker1;
+        private System.Windows.Forms.TextBox logBox;
+        private System.Windows.Forms.ContextMenuStrip contextMenuStrip1;
     }
 }
 
