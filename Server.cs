@@ -34,11 +34,6 @@ namespace Webserver
 
         string HandlePost(string pathToFile, string query)
         {
-            if (PHPFile == "" || (!File.Exists(PHPFile)))
-            {
-                throw new FileNotFoundException();
-            }
-
             ProcessStartInfo StartInfo = new ProcessStartInfo
             {
                 FileName = PHPFile,
@@ -62,8 +57,6 @@ namespace Webserver
             streamWriter.WriteLine("");
             streamWriter.Close();
 
-
-
             while (!proc.StandardOutput.EndOfStream)
             {
                 outputPHP += proc.StandardOutput.ReadLine();
@@ -72,6 +65,42 @@ namespace Webserver
             return outputPHP;
             
         }
+
+
+        string HandleGet(string pathToFile, string query)
+        {
+            ProcessStartInfo StartInfo = new ProcessStartInfo
+            {
+                FileName = PHPFile,
+                UseShellExecute = false,
+                RedirectStandardOutput = true,
+                CreateNoWindow = true,
+                RedirectStandardInput = true
+            };
+            StartInfo.EnvironmentVariables.Add("REQUEST_METHOD", "GET");
+            StartInfo.EnvironmentVariables.Add("QUERY_STRING", query);
+            StartInfo.EnvironmentVariables.Add("SCRIPT_FILENAME", pathToFile);
+            StartInfo.EnvironmentVariables.Add("REDIRECT_STATUS", "0");
+            StartInfo.EnvironmentVariables.Add("CONTENT_TYPE", "application/x-www-form-urlencoded");
+            Process proc = new Process();
+            proc.StartInfo = StartInfo;
+
+            string outputPHP = "";
+            proc.Start();
+            //var streamWriter = proc.StandardInput;
+            //streamWriter.WriteLine(query);
+            //streamWriter.WriteLine("");
+            //streamWriter.Close();
+
+            while (!proc.StandardOutput.EndOfStream)
+            {
+                outputPHP += proc.StandardOutput.ReadLine();
+            }
+            outputPHP = outputPHP.Substring(outputPHP.IndexOf('<'));
+            return outputPHP;
+
+        }
+
 
         void ServeClient()
         {
@@ -136,7 +165,15 @@ namespace Webserver
                     {
                         throw new FileNotFoundException();
                     }
-                    bodyData = Encoding.ASCII.GetBytes(HandlePost(pathToFile, "fname=Kolya&fname2=SADMASDMADMSA"));
+                    if (request.Method=="POST")
+                    {
+                        bodyData = Encoding.ASCII.GetBytes(HandlePost(pathToFile, request.Body));
+                    }
+                    else
+                    {
+                        bodyData = Encoding.ASCII.GetBytes(HandleGet(pathToFile, request.Query));
+                    }
+                    
                 }
 
                 //TODO Move to another class and add type parsing

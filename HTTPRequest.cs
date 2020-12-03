@@ -15,7 +15,21 @@ namespace Webserver
                 var lines = data.Split(new[] { "\r\n" }, StringSplitOptions.None).ToList<string>();
                 string[] first = lines[0].Split(new[] { ' ' });
                 Method = first[0];
-                Path = first[1];
+
+                string pathAndQueryString= first[1];
+
+                if (pathAndQueryString.IndexOf('?')>=0)
+                {
+                    string[] pathAndQueryArray = pathAndQueryString.Split(new[] { '?' });
+                    Path = pathAndQueryArray[0].Trim();
+                    Query = pathAndQueryArray[1].Trim();
+                }
+                else
+                {
+                    Path = pathAndQueryString;
+                    Query = "";
+                }
+
                 Version = first[2];
                 int endOfHeaders = lines.IndexOf("");
                 for (int i = 1; i < endOfHeaders; i++)
@@ -41,6 +55,7 @@ namespace Webserver
         }
         public string Method { get; set; }
         public string Path { get; set; }
+        public string Query { get; set; }
         public string Version { get; set; }
         public Dictionary<string, string> Headers { get; set; } =  new Dictionary<string, string>();
         public string Body { get; set; }
