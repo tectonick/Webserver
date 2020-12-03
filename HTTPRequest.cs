@@ -56,7 +56,6 @@ namespace Webserver
             }
             result += "\r\n";
             result += Body;
-            result += "\r\n\r\n";
             return result;
         }
 

@@ -5,6 +5,7 @@ using System.Data;
 using System.Drawing;
 using System.Linq;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 
@@ -12,6 +13,7 @@ namespace Webserver
 {
     public partial class Form1 : Form
     {
+        Thread serverThread;
         public Form1()
         {
             InitializeComponent();
@@ -22,8 +24,13 @@ namespace Webserver
             stopButton.Enabled = true;
             startButton.Enabled = false;
 
+            
             Server server = new Server(System.Net.IPAddress.Parse("127.0.0.1"),8080,webRootInput.Text);
-            server.Start();
+            ThreadStart threadStart = new ThreadStart(server.Start);
+            
+            serverThread = new Thread(threadStart);
+            serverThread.Start();
+            //server.Start();
         }
 
         private void trayMenu_Click(object sender, EventArgs e)
@@ -62,6 +69,7 @@ namespace Webserver
         {
             startButton.Enabled = true;
             stopButton.Enabled = false;
+            serverThread.Abort();
         }
 
         private void chooseFolderButton_Click(object sender, EventArgs e)

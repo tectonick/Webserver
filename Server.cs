@@ -8,16 +8,18 @@ using System.Net;
 using System.Net.Sockets;
 using System.Timers;
 using System.Diagnostics;
+using System.Threading;
 
 namespace Webserver
 {
     class Server
     {
-
+        int requestNumber = 0;
+        List<string> defaultFiles = new List<string>{ Path.Combine(".","index.html"), Path.Combine(".","index.htm"), Path.Combine(".","index.php"),"" };
+        List<string> defaultExtensions = new List<string> { ".html", ".htm", ".php", "" };
         private TcpListener _server = null;
         public int Port { get; set; } = 8080;
         public IPAddress Address { get; set; } = IPAddress.Parse("127.0.0.1");
-        Byte[] bytes = new Byte[4096];
         public string WebRoot { get; set; } = "/";
         public Server(IPAddress addr, int port, string root)
         {
@@ -27,114 +29,128 @@ namespace Webserver
         }
         public Server()
         {
-
         }
+        void ServeClient()
+        {
+            TcpClient client = _server.AcceptTcpClient();
+            Byte[] buffer = new Byte[4096];
+            String data = null;
+            data = null;
+            NetworkStream stream = client.GetStream();
+            int requestLength;
+            HTTPResponse response = new HTTPResponse();
+            string delimiter = "______________________________________________________";
+            try
+            {
+                requestLength = stream.Read(buffer, 0, buffer.Length);
+
+                data = System.Text.Encoding.ASCII.GetString(buffer, 0, requestLength);
+                
+                Console.WriteLine("{2}\r\n_{0}_ Received: {1}\r\n{2}", requestNumber, data,delimiter);
+
+                //Parse request
+                HTTPRequest request = new HTTPRequest(data);
+
+                //TODO parse file types
+
+                string pathToFile = request.Path;
+                string opt = "";
+                pathToFile = pathToFile.Substring(1, pathToFile.Length - 1);
+
+
+                bool isExtensionOmitted = false;
+                if (!File.Exists(Path.Combine(WebRoot, pathToFile)))
+                {
+                    //Try interpret path as folder name
+                    foreach (var item in defaultFiles)
+                    {
+                        opt = item;
+                        if (File.Exists(Path.Combine(WebRoot, pathToFile,opt))) break;
+                    }
+                    //Try interpret path as filename with omitted extension
+                    if (opt == "")
+                    {
+                        foreach (var item in defaultExtensions)
+                        {
+                            opt = item;
+                            if (File.Exists(Path.Combine(WebRoot, pathToFile + opt)))
+                            {
+                                isExtensionOmitted = true;
+                                break;
+                            }
+                        }
+                    }
+                }
+
+                byte[] bodyData = (isExtensionOmitted)?File.ReadAllBytes(Path.Combine(WebRoot, pathToFile+ opt)): File.ReadAllBytes(Path.Combine(WebRoot, pathToFile,opt));
+
+                //TODO Move to another class and add type parsing
+                if (pathToFile.IndexOf(".jpg") >= 0)
+                {
+                    response.Headers.Add("Content-Type", "image/jpg");
+                    response.Headers.Add("Content-Length", bodyData.Length.ToString());
+                    response.isBodyBinary = true;
+                }
+
+
+                response.Body = bodyData;
+                response.StatusCode = "200";
+
+            }
+            catch (ArgumentException)
+            {
+                response.StatusCode = "400";
+            }
+            catch (FileNotFoundException)
+            {
+                response.StatusCode = "404";
+            }
+            catch (Exception)
+            {
+                response.StatusCode = "500";
+            }
+            response.Headers.Add("Host", "localhost:8080");
+            data = response.ToString();
+
+            byte[] byteData = response.ToBinary();
+            stream.Write(byteData, 0, byteData.Length);
+            Console.WriteLine("{2}\r\n_{0}_ Sent: \n{1} \r\n{2}", requestNumber, data, delimiter);
+            stream.Close();
+            requestNumber++;
+        }
+
         public void Start()
         {            
             try
             {
                 _server = new TcpListener(Address, Port);
                 _server.Start();
-                String data = null;
                 Console.WriteLine($"Server started on {Address}:{Port} with root at {WebRoot}");
-                int seq = 0;
                 //Listening loop
                 while (true)
-                {
-                    
-                    //Console.Write("Waiting for a connection... ");
-                    if (!_server.Pending())
+                { 
+                    if (_server.Pending())
                     {
-                        //Console.WriteLine("Sorry, no connection requests have arrived");
-                    }
-                    else
-                    {
-                        TcpClient client = _server.AcceptTcpClient();
-                            
-                        //Console.WriteLine("Connected!");
-                        data = null;
-                        NetworkStream stream = client.GetStream();
-                        int i;
-                        HTTPResponse response = new HTTPResponse();
-                        try
-                        {
-                            i = stream.Read(bytes, 0, bytes.Length);
-
-                        data = System.Text.Encoding.ASCII.GetString(bytes, 0, i);
-                        Console.WriteLine("_{0}_ Received: {1}", seq, data);
-
-                        //Parse request
-                        HTTPRequest request = new HTTPRequest(data);
-
-                       
-                        //TODO parse file types
-
-                            string pathToFile = request.Path;
-                            if (pathToFile[pathToFile.Length - 1] == '/')
-                            {
-                                pathToFile += "index.html";
-                            }
-
-                            pathToFile = pathToFile.Substring(1, pathToFile.Length - 1);
-                            byte[] bodyData= File.ReadAllBytes(Path.Combine(WebRoot, pathToFile));
-                            
-
-                            //TODO Move to another class and add type parsing
-                            if (pathToFile.IndexOf(".jpg") >= 0)
-                            {
-                                response.Headers.Add("Content-Type", "image/jpg");
-                                response.Headers.Add("Content-Length", bodyData.Length.ToString());                                
-                            }
-
-
-                            response.Body = bodyData;
-                            response.StatusCode = "200";
-
-                        }
-                        catch(ArgumentException)
-                        {
-                            response.StatusCode = "400";
-                        }
-                        catch (FileNotFoundException)
-                        {
-                            response.StatusCode = "404";
-                        }
-                        catch(Exception)
-                        {
-                            response.StatusCode = "500";
-                        }
-                        response.Headers.Add("Host", "localhost:8080");
-
-                        // TODO Fill response
-
-
-
-                        // Send back a response
-                        data = response.ToString();
-
-                        //byte[] msg = System.Text.Encoding.ASCII.GetBytes(data);
-                        //stream.Write(msg, 0, msg.Length);
-
-                        byte[] byteData = response.ToBinary();
-                        stream.Write(byteData, 0, byteData.Length);
-                        Console.WriteLine("_{0}_ Sent: \n{1}", seq, data);
-                        stream.Close();
-                        seq++;
-                  
+                        ThreadStart threadStart = new ThreadStart(this.ServeClient);
+                        Thread clientThread = new Thread(threadStart);
+                        clientThread.Start();
                     } 
-                        
                 }
             }
             catch (SocketException e)
             {
                 Console.WriteLine("SocketException: {0}", e);
             }
+            catch (ThreadAbortException e)
+            {
+                Console.WriteLine("Server thread aborted");                
+            }
             finally
             {
+                Console.WriteLine("Server stopped");
                 this.Stop();
             }
         }
-
 
         public void Stop()
         {

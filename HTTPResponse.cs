@@ -44,6 +44,8 @@ namespace Webserver
         public Dictionary<string, string> Headers { get; set; } = new Dictionary<string, string>();
         public byte[] Body { get; set; }
 
+        public bool isBodyBinary=false;
+
 
         public override string ToString()
         {
@@ -53,7 +55,19 @@ namespace Webserver
                 result += item.Key + ": " + item.Value + "\r\n";
             }
             result += "\r\n";
-            result += Encoding.ASCII.GetString(Body);
+            if (Body!=null)
+            {
+                if (isBodyBinary)
+                {
+                    result += "[Binary data]";
+                }
+                else
+                {
+                    result += Encoding.ASCII.GetString(Body);
+                }
+                
+            }
+
             return result;
         }
 
@@ -67,9 +81,17 @@ namespace Webserver
             textResult += "\r\n";
             byte[] byteTextResult = Encoding.ASCII.GetBytes(textResult);
 
-            var result = new byte[byteTextResult.Length + Body.Length];
-            byteTextResult.CopyTo(result, 0);
-            Body.CopyTo(result, byteTextResult.Length);
+            byte[] result;
+            if (Body!=null)
+            {
+                result = new byte[byteTextResult.Length + Body.Length];
+                byteTextResult.CopyTo(result, 0);
+                Body.CopyTo(result, byteTextResult.Length);
+            } else
+            {
+                result = new byte[byteTextResult.Length];
+                byteTextResult.CopyTo(result, 0);
+            }
             return result;
         }
     }
