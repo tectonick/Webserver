@@ -26,6 +26,7 @@ namespace Webserver
 
             
             Server server = new Server(System.Net.IPAddress.Parse("127.0.0.1"),8080,webRootInput.Text);
+            server.PHPFile = pathToPHPInput.Text;
             ThreadStart threadStart = new ThreadStart(server.Start);
             
             serverThread = new Thread(threadStart);
@@ -76,6 +77,17 @@ namespace Webserver
         {
             webRootBrowserDialog.ShowDialog();
             webRootInput.Text = webRootBrowserDialog.SelectedPath;
+        }
+
+        private void choosePHPFolderButton_Click(object sender, EventArgs e)
+        {
+            PHPBrowserDialog.ShowDialog();
+            pathToPHPInput.Text = PHPBrowserDialog.SelectedPath;
+        }
+
+        private void Form1_FormClosing(object sender, FormClosingEventArgs e)
+        {
+            notifyIcon1.Visible = false;
         }
     }
 }

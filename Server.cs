@@ -21,6 +21,7 @@ namespace Webserver
         public int Port { get; set; } = 8080;
         public IPAddress Address { get; set; } = IPAddress.Parse("127.0.0.1");
         public string WebRoot { get; set; } = "/";
+        public string PHPFile { get; set; } = "";
         public Server(IPAddress addr, int port, string root)
         {
             Port = port;
@@ -82,7 +83,38 @@ namespace Webserver
                     }
                 }
 
-                byte[] bodyData = (isExtensionOmitted)?File.ReadAllBytes(Path.Combine(WebRoot, pathToFile+ opt)): File.ReadAllBytes(Path.Combine(WebRoot, pathToFile,opt));
+                pathToFile = (isExtensionOmitted) ? Path.Combine(WebRoot, pathToFile + opt) : Path.Combine(WebRoot, pathToFile, opt);
+
+                byte[] bodyData = File.ReadAllBytes(pathToFile);
+
+
+                if (pathToFile.IndexOf(".php") >= 0)
+                {
+                    if (PHPFile=="")
+                    {
+                        throw new FileNotFoundException();
+                    }
+                    Process proc = new Process
+                    {
+                        StartInfo = new ProcessStartInfo
+                        {
+                            FileName = PHPFile,
+                            Arguments = "-f \""+ pathToFile+"\"",
+                            UseShellExecute = false,
+                            RedirectStandardOutput = true,
+                            CreateNoWindow = true
+                        }
+                    };
+
+                    proc.Start();
+                    string outputPHP = "";
+                    while (!proc.StandardOutput.EndOfStream)
+                    {
+                        outputPHP+=proc.StandardOutput.ReadLine();
+                        
+                    }
+                    bodyData = Encoding.ASCII.GetBytes(outputPHP);
+                }
 
                 //TODO Move to another class and add type parsing
                 if (pathToFile.IndexOf(".jpg") >= 0)

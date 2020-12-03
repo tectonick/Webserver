@@ -40,14 +40,22 @@
             this.rootPathLabel = new System.Windows.Forms.Label();
             this.webRootBrowserDialog = new System.Windows.Forms.FolderBrowserDialog();
             this.chooseFolderButton = new System.Windows.Forms.Button();
+            this.pathToPHPInput = new System.Windows.Forms.TextBox();
+            this.choosePHPFolderButton = new System.Windows.Forms.Button();
+            this.PHPBrowserDialog = new System.Windows.Forms.FolderBrowserDialog();
+            this.pathToPHPLabel = new System.Windows.Forms.Label();
+            this.configurationLabel = new System.Windows.Forms.Label();
+            this.panel1 = new System.Windows.Forms.Panel();
+            this.backgroundWorker1 = new System.ComponentModel.BackgroundWorker();
             this.trayMenu.SuspendLayout();
+            this.panel1.SuspendLayout();
             this.SuspendLayout();
             // 
             // startButton
             // 
-            this.startButton.Location = new System.Drawing.Point(216, 23);
+            this.startButton.Location = new System.Drawing.Point(12, 23);
             this.startButton.Name = "startButton";
-            this.startButton.Size = new System.Drawing.Size(75, 23);
+            this.startButton.Size = new System.Drawing.Size(141, 55);
             this.startButton.TabIndex = 0;
             this.startButton.Text = "Start server";
             this.startButton.UseVisualStyleBackColor = true;
@@ -84,18 +92,18 @@
             // 
             // webRootInput
             // 
-            this.webRootInput.Location = new System.Drawing.Point(12, 25);
+            this.webRootInput.Location = new System.Drawing.Point(3, 49);
             this.webRootInput.Name = "webRootInput";
-            this.webRootInput.Size = new System.Drawing.Size(174, 20);
+            this.webRootInput.Size = new System.Drawing.Size(252, 20);
             this.webRootInput.TabIndex = 2;
             this.webRootInput.Text = "C:\\Users\\korn9\\Desktop\\КСиС КП\\TestWebRoot";
             // 
             // stopButton
             // 
             this.stopButton.Enabled = false;
-            this.stopButton.Location = new System.Drawing.Point(297, 23);
+            this.stopButton.Location = new System.Drawing.Point(159, 23);
             this.stopButton.Name = "stopButton";
-            this.stopButton.Size = new System.Drawing.Size(75, 23);
+            this.stopButton.Size = new System.Drawing.Size(141, 55);
             this.stopButton.TabIndex = 0;
             this.stopButton.Text = "Stop server";
             this.stopButton.UseVisualStyleBackColor = true;
@@ -104,7 +112,7 @@
             // rootPathLabel
             // 
             this.rootPathLabel.AutoSize = true;
-            this.rootPathLabel.Location = new System.Drawing.Point(12, 9);
+            this.rootPathLabel.Location = new System.Drawing.Point(3, 33);
             this.rootPathLabel.Name = "rootPathLabel";
             this.rootPathLabel.Size = new System.Drawing.Size(51, 13);
             this.rootPathLabel.TabIndex = 3;
@@ -112,7 +120,7 @@
             // 
             // chooseFolderButton
             // 
-            this.chooseFolderButton.Location = new System.Drawing.Point(183, 23);
+            this.chooseFolderButton.Location = new System.Drawing.Point(261, 47);
             this.chooseFolderButton.Name = "chooseFolderButton";
             this.chooseFolderButton.Size = new System.Drawing.Size(27, 23);
             this.chooseFolderButton.TabIndex = 4;
@@ -120,23 +128,75 @@
             this.chooseFolderButton.UseVisualStyleBackColor = true;
             this.chooseFolderButton.Click += new System.EventHandler(this.chooseFolderButton_Click);
             // 
+            // pathToPHPInput
+            // 
+            this.pathToPHPInput.Location = new System.Drawing.Point(3, 87);
+            this.pathToPHPInput.Name = "pathToPHPInput";
+            this.pathToPHPInput.Size = new System.Drawing.Size(252, 20);
+            this.pathToPHPInput.TabIndex = 5;
+            this.pathToPHPInput.Text = "C:\\php\\php.exe";
+            // 
+            // choosePHPFolderButton
+            // 
+            this.choosePHPFolderButton.Location = new System.Drawing.Point(261, 85);
+            this.choosePHPFolderButton.Name = "choosePHPFolderButton";
+            this.choosePHPFolderButton.Size = new System.Drawing.Size(27, 23);
+            this.choosePHPFolderButton.TabIndex = 6;
+            this.choosePHPFolderButton.Text = "...";
+            this.choosePHPFolderButton.UseVisualStyleBackColor = true;
+            this.choosePHPFolderButton.Click += new System.EventHandler(this.choosePHPFolderButton_Click);
+            // 
+            // pathToPHPLabel
+            // 
+            this.pathToPHPLabel.AutoSize = true;
+            this.pathToPHPLabel.Location = new System.Drawing.Point(3, 71);
+            this.pathToPHPLabel.Name = "pathToPHPLabel";
+            this.pathToPHPLabel.Size = new System.Drawing.Size(82, 13);
+            this.pathToPHPLabel.TabIndex = 7;
+            this.pathToPHPLabel.Text = "Path to php.exe";
+            // 
+            // configurationLabel
+            // 
+            this.configurationLabel.AutoSize = true;
+            this.configurationLabel.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(204)));
+            this.configurationLabel.Location = new System.Drawing.Point(89, 4);
+            this.configurationLabel.Name = "configurationLabel";
+            this.configurationLabel.Size = new System.Drawing.Size(104, 20);
+            this.configurationLabel.TabIndex = 9;
+            this.configurationLabel.Text = "Configuration";
+            // 
+            // panel1
+            // 
+            this.panel1.BackColor = System.Drawing.Color.WhiteSmoke;
+            this.panel1.Controls.Add(this.chooseFolderButton);
+            this.panel1.Controls.Add(this.configurationLabel);
+            this.panel1.Controls.Add(this.webRootInput);
+            this.panel1.Controls.Add(this.pathToPHPLabel);
+            this.panel1.Controls.Add(this.rootPathLabel);
+            this.panel1.Controls.Add(this.choosePHPFolderButton);
+            this.panel1.Controls.Add(this.pathToPHPInput);
+            this.panel1.Location = new System.Drawing.Point(12, 84);
+            this.panel1.Name = "panel1";
+            this.panel1.Size = new System.Drawing.Size(290, 118);
+            this.panel1.TabIndex = 10;
+            // 
             // Form1
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(382, 450);
-            this.Controls.Add(this.chooseFolderButton);
-            this.Controls.Add(this.rootPathLabel);
-            this.Controls.Add(this.webRootInput);
+            this.ClientSize = new System.Drawing.Size(314, 218);
+            this.Controls.Add(this.panel1);
             this.Controls.Add(this.stopButton);
             this.Controls.Add(this.startButton);
             this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
             this.Name = "Form1";
             this.Text = "Simple web server";
+            this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.Form1_FormClosing);
             this.Resize += new System.EventHandler(this.Form1_Resize);
             this.trayMenu.ResumeLayout(false);
+            this.panel1.ResumeLayout(false);
+            this.panel1.PerformLayout();
             this.ResumeLayout(false);
-            this.PerformLayout();
 
         }
 
@@ -152,6 +212,13 @@
         private System.Windows.Forms.Label rootPathLabel;
         private System.Windows.Forms.FolderBrowserDialog webRootBrowserDialog;
         private System.Windows.Forms.Button chooseFolderButton;
+        private System.Windows.Forms.TextBox pathToPHPInput;
+        private System.Windows.Forms.Button choosePHPFolderButton;
+        private System.Windows.Forms.FolderBrowserDialog PHPBrowserDialog;
+        private System.Windows.Forms.Label pathToPHPLabel;
+        private System.Windows.Forms.Label configurationLabel;
+        private System.Windows.Forms.Panel panel1;
+        private System.ComponentModel.BackgroundWorker backgroundWorker1;
     }
 }
 
