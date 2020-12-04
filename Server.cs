@@ -204,36 +204,75 @@ namespace Webserver
             response.Headers.Add("X-Powered-By", "PHP");
             response.Headers.Add("Content-Type", "text/html");
         }
-        private void handleJPG(HTTPRequest request, HTTPResponse response, string pathToFile) {
-            response.Body = File.ReadAllBytes(pathToFile);
-            response.Headers.Add("Content-Type", "image/jpg");
-            response.Headers.Add("Content-Length", response.Body.Length.ToString());
-            response.isBodyBinary = true;
+
+        private void handleStatic(HTTPRequest request, HTTPResponse response, string pathToFile)
+        { 
+            response.Body=File.ReadAllBytes(pathToFile);
         }
 
-        private void handleText(HTTPRequest request, HTTPResponse response, string pathToFile)
+        private void AddContentTypeHeader(HTTPResponse response, string pathToFile)
         {
-            string extension =Path.GetExtension(pathToFile);
+            string extension = Path.GetExtension(pathToFile);
 
             switch (extension)
             {
                 case ".html":
-                    response.Headers.Add("Content-Type", "text/html");
-                    break;
                 case ".htm":
+                case ".php":
                     response.Headers.Add("Content-Type", "text/html");
                     break;
                 case ".css":
                     response.Headers.Add("Content-Type", "text/css");
                     break;
                 case ".js":
-                    response.Headers.Add("Content-Type", "application/x-javascript");
+                    response.Headers.Add("Content-Type", "text/javascript");
+                    break;
+                case ".jpg":
+                case ".jpeg":
+                case ".jfif":
+                case ".pjpeg":
+                case ".pjp":
+                    response.Headers.Add("Content-Type", "image/jpeg");
+                    response.isBodyBinary = true;
+                    break;
+                case ".ico":
+                case ".cur":
+                    response.Headers.Add("Content-Type", "image/x-icon");
+                    response.isBodyBinary = true;
+                    break;
+                case ".png":
+                    response.Headers.Add("Content-Type", "image/png");
+                    response.isBodyBinary = true;
+                    break;
+                case ".apng":
+                    response.Headers.Add("Content-Type", "image/apng");
+                    response.isBodyBinary = true;
+                    break;
+                case ".gif":
+                    response.Headers.Add("Content-Type", "image/gif");
+                    response.isBodyBinary = true;
+                    break;
+                case ".bmp":
+                    response.Headers.Add("Content-Type", "image/bmp");
+                    response.isBodyBinary = true;
+                    break;
+                case ".svg":
+                    response.Headers.Add("Content-Type", "image/svg+xml");
+                    response.isBodyBinary = true;
+                    break;
+                case ".webp":
+                    response.Headers.Add("Content-Type", "image/webp");
+                    response.isBodyBinary = true;
+                    break;
+                case ".tiff":
+                case ".tif":
+                    response.Headers.Add("Content-Type", "image/tiff");
+                    response.isBodyBinary = true;
                     break;
                 default:
+                    response.Headers.Add("Content-Type", "text/plain");                    
                     break;
             }
-
-            response.Body=File.ReadAllBytes(pathToFile);
         }
 
         private void ServeClient()
@@ -262,18 +301,20 @@ namespace Webserver
                 HTTPRequest request = new HTTPRequest(rawRequest);
                 //Check filename and fill missing extensions or names
                 string pathToFile = CheckAndParseFilename(request.Path);
+
+                //Add MIME content type header
+                AddContentTypeHeader(response, pathToFile);
+
                 // Handle filetypes
                 if (pathToFile.IndexOf(".php") >= 0)
                 {
                     handlePHP(request, response, pathToFile);
                 } else
-                if (pathToFile.IndexOf(".jpg") >= 0)
                 {
-                    handleJPG(request, response, pathToFile);
-                } else
-                {
-                    handleText(request, response, pathToFile);
+                    handleStatic(request, response, pathToFile);
                 }
+
+                response.Headers.Add("Content-Length", response.Body.Length.ToString());
             }
             catch (ArgumentException)
             {
