@@ -23,35 +23,55 @@ namespace Webserver
         {
             this.Invoke(new MethodInvoker(delegate ()
             {
-                
-                logBox.Text += data+"\r\n\r\n";
+
+                logBox.AppendText(data + "\r\n\r\n");
 
             }));            
         }
 
         private void startServer()
         {
-            Server server = new Server(System.Net.IPAddress.Parse("127.0.0.1"), 8080, webRootInput.Text);
-            server.PHPFile = pathToPHPInput.Text;
-            server.Log = this.Log;
-            ThreadStart threadStart = new ThreadStart(server.Start);
-            serverThread = new Thread(threadStart);
-            serverThread.Start();
+            try
+            {
+                Server server = new Server(System.Net.IPAddress.Parse(addressInput.Text), Int32.Parse(portInput.Text), webRootInput.Text);
+                server.PHPFile = pathToPHPInput.Text;
+                server.Log = this.Log;
+                server.OnStop += stopServer;
 
-            stopButton.Enabled = true;
-            stopTrayButton.Enabled = true;
-            startButton.Enabled = false;
-            startTrayButton.Enabled = false;
+                ThreadStart threadStart = new ThreadStart(server.Start);
+                serverThread = new Thread(threadStart);
+                serverThread.Start();
+
+                stopButton.Enabled = true;
+                stopTrayButton.Enabled = true;
+                startButton.Enabled = false;
+                startTrayButton.Enabled = false;
+                this.Text = $"Simple server (Running on {addressInput.Text}:{portInput.Text})";
+                trayIcon.Text= $"Simple server (Running on {addressInput.Text}:{portInput.Text})";
+            }
+            catch (Exception)
+            {
+                Log("Cannot start server, maybe settings are incorrect");
+            }           
         }
+
+
 
         private void stopServer()
         {
-            startButton.Enabled = true;
-            startTrayButton.Enabled = true;
-            stopButton.Enabled = false;
-            stopTrayButton.Enabled = false;
-            serverThread.Abort();
-
+            this.Invoke(new MethodInvoker(delegate ()
+            {
+                startButton.Enabled = true;
+                startTrayButton.Enabled = true;
+                stopButton.Enabled = false;
+                stopTrayButton.Enabled = false;
+                this.Text = $"Simple server (Stopped)";
+                trayIcon.Text = $"Simple server (Stopped)";
+                if (serverThread.ThreadState==ThreadState.Running)
+                {
+                    serverThread.Abort();
+                }                
+            }));
         }
 
         private void startButton_Click(object sender, EventArgs e)

@@ -53,6 +53,10 @@
             this.stopTrayButton = new System.Windows.Forms.ToolStripMenuItem();
             this.toolStripSeparator1 = new System.Windows.Forms.ToolStripSeparator();
             this.toolStripSeparator2 = new System.Windows.Forms.ToolStripSeparator();
+            this.portLabel = new System.Windows.Forms.Label();
+            this.addressLabel = new System.Windows.Forms.Label();
+            this.addressInput = new System.Windows.Forms.TextBox();
+            this.portInput = new System.Windows.Forms.TextBox();
             this.trayMenu.SuspendLayout();
             this.panel1.SuspendLayout();
             this.SuspendLayout();
@@ -71,7 +75,7 @@
             // 
             this.trayIcon.ContextMenuStrip = this.trayMenu;
             this.trayIcon.Icon = ((System.Drawing.Icon)(resources.GetObject("trayIcon.Icon")));
-            this.trayIcon.Text = "Simple server";
+            this.trayIcon.Text = "Simple server (stopped)";
             this.trayIcon.Visible = true;
             // 
             // trayMenu
@@ -101,7 +105,7 @@
             // 
             // webRootInput
             // 
-            this.webRootInput.Location = new System.Drawing.Point(3, 49);
+            this.webRootInput.Location = new System.Drawing.Point(2, 85);
             this.webRootInput.Name = "webRootInput";
             this.webRootInput.Size = new System.Drawing.Size(252, 20);
             this.webRootInput.TabIndex = 2;
@@ -121,7 +125,7 @@
             // rootPathLabel
             // 
             this.rootPathLabel.AutoSize = true;
-            this.rootPathLabel.Location = new System.Drawing.Point(3, 33);
+            this.rootPathLabel.Location = new System.Drawing.Point(2, 69);
             this.rootPathLabel.Name = "rootPathLabel";
             this.rootPathLabel.Size = new System.Drawing.Size(51, 13);
             this.rootPathLabel.TabIndex = 3;
@@ -129,7 +133,7 @@
             // 
             // chooseFolderButton
             // 
-            this.chooseFolderButton.Location = new System.Drawing.Point(261, 47);
+            this.chooseFolderButton.Location = new System.Drawing.Point(260, 83);
             this.chooseFolderButton.Name = "chooseFolderButton";
             this.chooseFolderButton.Size = new System.Drawing.Size(27, 23);
             this.chooseFolderButton.TabIndex = 4;
@@ -139,7 +143,7 @@
             // 
             // pathToPHPInput
             // 
-            this.pathToPHPInput.Location = new System.Drawing.Point(3, 87);
+            this.pathToPHPInput.Location = new System.Drawing.Point(2, 123);
             this.pathToPHPInput.Name = "pathToPHPInput";
             this.pathToPHPInput.Size = new System.Drawing.Size(252, 20);
             this.pathToPHPInput.TabIndex = 5;
@@ -147,7 +151,7 @@
             // 
             // choosePHPFolderButton
             // 
-            this.choosePHPFolderButton.Location = new System.Drawing.Point(261, 85);
+            this.choosePHPFolderButton.Location = new System.Drawing.Point(260, 121);
             this.choosePHPFolderButton.Name = "choosePHPFolderButton";
             this.choosePHPFolderButton.Size = new System.Drawing.Size(27, 23);
             this.choosePHPFolderButton.TabIndex = 6;
@@ -158,7 +162,7 @@
             // pathToPHPLabel
             // 
             this.pathToPHPLabel.AutoSize = true;
-            this.pathToPHPLabel.Location = new System.Drawing.Point(3, 71);
+            this.pathToPHPLabel.Location = new System.Drawing.Point(2, 107);
             this.pathToPHPLabel.Name = "pathToPHPLabel";
             this.pathToPHPLabel.Size = new System.Drawing.Size(99, 13);
             this.pathToPHPLabel.TabIndex = 7;
@@ -177,6 +181,10 @@
             // panel1
             // 
             this.panel1.BackColor = System.Drawing.Color.WhiteSmoke;
+            this.panel1.Controls.Add(this.portInput);
+            this.panel1.Controls.Add(this.addressInput);
+            this.panel1.Controls.Add(this.addressLabel);
+            this.panel1.Controls.Add(this.portLabel);
             this.panel1.Controls.Add(this.chooseFolderButton);
             this.panel1.Controls.Add(this.configurationLabel);
             this.panel1.Controls.Add(this.webRootInput);
@@ -186,7 +194,7 @@
             this.panel1.Controls.Add(this.pathToPHPInput);
             this.panel1.Location = new System.Drawing.Point(12, 73);
             this.panel1.Name = "panel1";
-            this.panel1.Size = new System.Drawing.Size(290, 118);
+            this.panel1.Size = new System.Drawing.Size(290, 149);
             this.panel1.TabIndex = 10;
             // 
             // logBox
@@ -195,7 +203,7 @@
             this.logBox.Multiline = true;
             this.logBox.Name = "logBox";
             this.logBox.ScrollBars = System.Windows.Forms.ScrollBars.Vertical;
-            this.logBox.Size = new System.Drawing.Size(477, 178);
+            this.logBox.Size = new System.Drawing.Size(477, 209);
             this.logBox.TabIndex = 11;
             // 
             // contextMenuStrip1
@@ -226,16 +234,52 @@
             this.toolStripSeparator2.Name = "toolStripSeparator2";
             this.toolStripSeparator2.Size = new System.Drawing.Size(100, 6);
             // 
+            // portLabel
+            // 
+            this.portLabel.AutoSize = true;
+            this.portLabel.Location = new System.Drawing.Point(228, 29);
+            this.portLabel.Name = "portLabel";
+            this.portLabel.Size = new System.Drawing.Size(26, 13);
+            this.portLabel.TabIndex = 10;
+            this.portLabel.Text = "Port";
+            // 
+            // addressLabel
+            // 
+            this.addressLabel.AutoSize = true;
+            this.addressLabel.Location = new System.Drawing.Point(2, 29);
+            this.addressLabel.Name = "addressLabel";
+            this.addressLabel.Size = new System.Drawing.Size(69, 13);
+            this.addressLabel.TabIndex = 11;
+            this.addressLabel.Text = "Host address";
+            // 
+            // addressInput
+            // 
+            this.addressInput.Location = new System.Drawing.Point(2, 45);
+            this.addressInput.Name = "addressInput";
+            this.addressInput.Size = new System.Drawing.Size(219, 20);
+            this.addressInput.TabIndex = 12;
+            this.addressInput.Text = "127.0.0.1";
+            // 
+            // portInput
+            // 
+            this.portInput.Location = new System.Drawing.Point(227, 45);
+            this.portInput.Name = "portInput";
+            this.portInput.Size = new System.Drawing.Size(60, 20);
+            this.portInput.TabIndex = 13;
+            this.portInput.Text = "8080";
+            // 
             // Form1
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(798, 204);
+            this.ClientSize = new System.Drawing.Size(798, 232);
             this.Controls.Add(this.logBox);
             this.Controls.Add(this.panel1);
             this.Controls.Add(this.stopButton);
             this.Controls.Add(this.startButton);
+            this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedSingle;
             this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
+            this.MaximizeBox = false;
             this.Name = "Form1";
             this.Text = "Simple web server";
             this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.Form1_FormClosing);
@@ -273,6 +317,10 @@
         private System.Windows.Forms.ToolStripMenuItem startTrayButton;
         private System.Windows.Forms.ToolStripMenuItem stopTrayButton;
         private System.Windows.Forms.ToolStripSeparator toolStripSeparator2;
+        private System.Windows.Forms.TextBox portInput;
+        private System.Windows.Forms.TextBox addressInput;
+        private System.Windows.Forms.Label addressLabel;
+        private System.Windows.Forms.Label portLabel;
     }
 }
 

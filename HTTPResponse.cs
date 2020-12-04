@@ -14,7 +14,9 @@ namespace Webserver
             { "302", "Redirect"},
             { "400", "Bad Request" },
             { "404",  "Not found"},
-            { "500",  "Server error"}
+            { "405",  "Method Not Allowed"},
+            { "500",  "Server error"},
+            { "505",  "HTTP Version Not Supported"}
         };
         public HTTPResponse() {}
         string _statusCode;

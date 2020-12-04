@@ -21,6 +21,9 @@ namespace Webserver
 
         public delegate void Loggger(string data);
         public Loggger Log;
+
+        public delegate void Stopped();
+        public event Stopped OnStop;
         public Server(IPAddress addr, int port, string root)
         {
             Port = port;
@@ -42,7 +45,9 @@ namespace Webserver
                     if (_server.Pending())
                     {
                         ThreadStart threadStart = new ThreadStart(this.ServeClient);
+                        
                         Thread clientThread = new Thread(threadStart);
+
                         clientThread.Start();
                     }
                 }
@@ -58,11 +63,11 @@ namespace Webserver
             }
             catch (Exception e)
             {
-
             }
             finally
             {
                 Log("Server stopped");
+                OnStop.Invoke();
                 this.Stop();
             }
         }
@@ -299,6 +304,15 @@ namespace Webserver
                 
                 //Parse request
                 HTTPRequest request = new HTTPRequest(rawRequest);
+                if ((request.Method!="POST")&&(request.Method != "GET"))
+                {
+                    throw new InvalidOperationException();
+                }
+                if (request.Version != "HTTP/1.1")
+                {
+                    throw new NotSupportedException();
+                }
+
                 //Check filename and fill missing extensions or names
                 string pathToFile = CheckAndParseFilename(request.Path);
 
@@ -315,6 +329,14 @@ namespace Webserver
                 }
 
                 response.Headers.Add("Content-Length", response.Body.Length.ToString());
+            }
+            catch (NotSupportedException)
+            {
+                response.StatusCode = "405";
+            }
+            catch (InvalidOperationException)
+            {
+                response.StatusCode = "405";
             }
             catch (ArgumentException)
             {
