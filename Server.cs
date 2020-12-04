@@ -59,7 +59,7 @@ namespace Webserver
             }
             catch (ThreadAbortException e)
             {
-                Log("Server thread aborted");
+                //Log("Server thread aborted");
             }
             catch (Exception e)
             {
