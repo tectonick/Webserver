@@ -200,6 +200,9 @@ namespace Webserver
                 response.Headers.Add("location", location);
                 response.StatusCode = "302";
             }
+           
+            response.Headers.Add("X-Powered-By", "PHP");
+            response.Headers.Add("Content-Type", "text/html");
         }
         private void handleJPG(HTTPRequest request, HTTPResponse response, string pathToFile) {
             response.Body = File.ReadAllBytes(pathToFile);
@@ -210,6 +213,26 @@ namespace Webserver
 
         private void handleText(HTTPRequest request, HTTPResponse response, string pathToFile)
         {
+            string extension =Path.GetExtension(pathToFile);
+
+            switch (extension)
+            {
+                case ".html":
+                    response.Headers.Add("Content-Type", "text/html");
+                    break;
+                case ".htm":
+                    response.Headers.Add("Content-Type", "text/html");
+                    break;
+                case ".css":
+                    response.Headers.Add("Content-Type", "text/css");
+                    break;
+                case ".js":
+                    response.Headers.Add("Content-Type", "application/x-javascript");
+                    break;
+                default:
+                    break;
+            }
+
             response.Body=File.ReadAllBytes(pathToFile);
         }
 
@@ -264,7 +287,9 @@ namespace Webserver
             {
                 response.StatusCode = "500";
             }
-            response.Headers.Add("Host", $"{Address.ToString()}:{Port}");            
+            response.Headers.Add("Host", $"{Address.ToString()}:{Port}");
+            response.Headers.Add("Server", "simple");
+            response.Headers.Add("Date", DateTime.UtcNow.ToString("ddd, dd MMM yyy HH:mm:ss G'M'T"));
             byte[] readyResponse = response.ToBinary();
             stream.Write(readyResponse, 0, readyResponse.Length);
             stream.Close();

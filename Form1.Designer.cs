@@ -31,7 +31,7 @@
             this.components = new System.ComponentModel.Container();
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(Form1));
             this.startButton = new System.Windows.Forms.Button();
-            this.notifyIcon1 = new System.Windows.Forms.NotifyIcon(this.components);
+            this.trayIcon = new System.Windows.Forms.NotifyIcon(this.components);
             this.trayMenu = new System.Windows.Forms.ContextMenuStrip(this.components);
             this.openTrayButton = new System.Windows.Forms.ToolStripMenuItem();
             this.exitTrayButton = new System.Windows.Forms.ToolStripMenuItem();
@@ -49,6 +49,10 @@
             this.backgroundWorker1 = new System.ComponentModel.BackgroundWorker();
             this.logBox = new System.Windows.Forms.TextBox();
             this.contextMenuStrip1 = new System.Windows.Forms.ContextMenuStrip(this.components);
+            this.startTrayButton = new System.Windows.Forms.ToolStripMenuItem();
+            this.stopTrayButton = new System.Windows.Forms.ToolStripMenuItem();
+            this.toolStripSeparator1 = new System.Windows.Forms.ToolStripSeparator();
+            this.toolStripSeparator2 = new System.Windows.Forms.ToolStripSeparator();
             this.trayMenu.SuspendLayout();
             this.panel1.SuspendLayout();
             this.SuspendLayout();
@@ -63,20 +67,24 @@
             this.startButton.UseVisualStyleBackColor = true;
             this.startButton.Click += new System.EventHandler(this.startButton_Click);
             // 
-            // notifyIcon1
+            // trayIcon
             // 
-            this.notifyIcon1.ContextMenuStrip = this.trayMenu;
-            this.notifyIcon1.Icon = ((System.Drawing.Icon)(resources.GetObject("notifyIcon1.Icon")));
-            this.notifyIcon1.Text = "notifyIcon1";
-            this.notifyIcon1.Visible = true;
+            this.trayIcon.ContextMenuStrip = this.trayMenu;
+            this.trayIcon.Icon = ((System.Drawing.Icon)(resources.GetObject("trayIcon.Icon")));
+            this.trayIcon.Text = "Simple server";
+            this.trayIcon.Visible = true;
             // 
             // trayMenu
             // 
             this.trayMenu.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.openTrayButton,
+            this.toolStripSeparator1,
+            this.startTrayButton,
+            this.stopTrayButton,
+            this.toolStripSeparator2,
             this.exitTrayButton});
             this.trayMenu.Name = "trayMenu";
-            this.trayMenu.Size = new System.Drawing.Size(104, 48);
+            this.trayMenu.Size = new System.Drawing.Size(104, 104);
             this.trayMenu.ItemClicked += new System.Windows.Forms.ToolStripItemClickedEventHandler(this.trayMenu_ItemClicked);
             // 
             // openTrayButton
@@ -195,6 +203,29 @@
             this.contextMenuStrip1.Name = "contextMenuStrip1";
             this.contextMenuStrip1.Size = new System.Drawing.Size(61, 4);
             // 
+            // startTrayButton
+            // 
+            this.startTrayButton.Name = "startTrayButton";
+            this.startTrayButton.Size = new System.Drawing.Size(103, 22);
+            this.startTrayButton.Text = "Start";
+            // 
+            // stopTrayButton
+            // 
+            this.stopTrayButton.Enabled = false;
+            this.stopTrayButton.Name = "stopTrayButton";
+            this.stopTrayButton.Size = new System.Drawing.Size(103, 22);
+            this.stopTrayButton.Text = "Stop";
+            // 
+            // toolStripSeparator1
+            // 
+            this.toolStripSeparator1.Name = "toolStripSeparator1";
+            this.toolStripSeparator1.Size = new System.Drawing.Size(100, 6);
+            // 
+            // toolStripSeparator2
+            // 
+            this.toolStripSeparator2.Name = "toolStripSeparator2";
+            this.toolStripSeparator2.Size = new System.Drawing.Size(100, 6);
+            // 
             // Form1
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
@@ -220,7 +251,7 @@
         #endregion
 
         private System.Windows.Forms.Button startButton;
-        private System.Windows.Forms.NotifyIcon notifyIcon1;
+        private System.Windows.Forms.NotifyIcon trayIcon;
         private System.Windows.Forms.ContextMenuStrip trayMenu;
         private System.Windows.Forms.ToolStripMenuItem exitTrayButton;
         private System.Windows.Forms.ToolStripMenuItem openTrayButton;
@@ -238,6 +269,10 @@
         private System.ComponentModel.BackgroundWorker backgroundWorker1;
         private System.Windows.Forms.TextBox logBox;
         private System.Windows.Forms.ContextMenuStrip contextMenuStrip1;
+        private System.Windows.Forms.ToolStripSeparator toolStripSeparator1;
+        private System.Windows.Forms.ToolStripMenuItem startTrayButton;
+        private System.Windows.Forms.ToolStripMenuItem stopTrayButton;
+        private System.Windows.Forms.ToolStripSeparator toolStripSeparator2;
     }
 }
 

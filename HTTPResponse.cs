@@ -8,7 +8,7 @@ namespace Webserver
 {
     class HTTPResponse
     {
-        static Dictionary<string, string> StatusCodes = new Dictionary<string, string>()
+        readonly static Dictionary<string, string> StatusCodes = new Dictionary<string, string>()
         {
             { "200", "OK"},
             { "302", "Redirect"},
@@ -16,10 +16,7 @@ namespace Webserver
             { "404",  "Not found"},
             { "500",  "Server error"}
         };
-        public HTTPResponse()
-        {
-
-        }
+        public HTTPResponse() {}
         string _statusCode;
         public string StatusCode { 
             get {

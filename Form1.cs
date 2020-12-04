@@ -23,14 +23,15 @@ namespace Webserver
         {
             this.Invoke(new MethodInvoker(delegate ()
             {
+                
                 logBox.Text += data+"\r\n\r\n";
 
             }));            
         }
 
-        private void startButton_Click(object sender, EventArgs e)
+        private void startServer()
         {
-            Server server = new Server(System.Net.IPAddress.Parse("127.0.0.1"),8080,webRootInput.Text);
+            Server server = new Server(System.Net.IPAddress.Parse("127.0.0.1"), 8080, webRootInput.Text);
             server.PHPFile = pathToPHPInput.Text;
             server.Log = this.Log;
             ThreadStart threadStart = new ThreadStart(server.Start);
@@ -38,8 +39,27 @@ namespace Webserver
             serverThread.Start();
 
             stopButton.Enabled = true;
+            stopTrayButton.Enabled = true;
             startButton.Enabled = false;
+            startTrayButton.Enabled = false;
         }
+
+        private void stopServer()
+        {
+            startButton.Enabled = true;
+            startTrayButton.Enabled = true;
+            stopButton.Enabled = false;
+            stopTrayButton.Enabled = false;
+            serverThread.Abort();
+
+        }
+
+        private void startButton_Click(object sender, EventArgs e)
+        {
+            startServer();
+        }
+
+
 
         private void trayMenu_ItemClicked(object sender, ToolStripItemClickedEventArgs e)
         {
@@ -51,6 +71,12 @@ namespace Webserver
                 case "Open":
                     Show();
                     WindowState = FormWindowState.Normal;
+                    break;
+                case "Start":
+                    startServer();
+                    break;
+                case "Stop":
+                    stopServer();
                     break;
                 case "Exit":
                     Application.Exit();
@@ -70,9 +96,7 @@ namespace Webserver
 
         private void stopButton_Click(object sender, EventArgs e)
         {
-            startButton.Enabled = true;
-            stopButton.Enabled = false;
-            serverThread.Abort();
+            stopServer();
         }
 
         private void chooseFolderButton_Click(object sender, EventArgs e)
@@ -89,7 +113,7 @@ namespace Webserver
 
         private void Form1_FormClosing(object sender, FormClosingEventArgs e)
         {
-            notifyIcon1.Visible = false;
+            trayIcon.Visible = false;
         }
     }
 }

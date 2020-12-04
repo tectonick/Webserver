@@ -60,8 +60,6 @@ namespace Webserver
         public Dictionary<string, string> Headers { get; set; } =  new Dictionary<string, string>();
         public string Body { get; set; }
 
-        public byte[] BinaryBody { get; set; }
-
         public override string ToString()
         {
             string result = Method + " " + Path + " " + Version + "\r\n";
