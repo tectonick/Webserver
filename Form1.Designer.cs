@@ -57,15 +57,21 @@
             this.addressLabel = new System.Windows.Forms.Label();
             this.addressInput = new System.Windows.Forms.TextBox();
             this.portInput = new System.Windows.Forms.TextBox();
+            this.panel2 = new System.Windows.Forms.Panel();
+            this.logsLabel = new System.Windows.Forms.Label();
+            this.panel3 = new System.Windows.Forms.Panel();
+            this.controlLabel = new System.Windows.Forms.Label();
             this.trayMenu.SuspendLayout();
             this.panel1.SuspendLayout();
+            this.panel2.SuspendLayout();
+            this.panel3.SuspendLayout();
             this.SuspendLayout();
             // 
             // startButton
             // 
-            this.startButton.Location = new System.Drawing.Point(12, 12);
+            this.startButton.Location = new System.Drawing.Point(149, 30);
             this.startButton.Name = "startButton";
-            this.startButton.Size = new System.Drawing.Size(141, 55);
+            this.startButton.Size = new System.Drawing.Size(138, 55);
             this.startButton.TabIndex = 0;
             this.startButton.Text = "Start server";
             this.startButton.UseVisualStyleBackColor = true;
@@ -77,6 +83,7 @@
             this.trayIcon.Icon = ((System.Drawing.Icon)(resources.GetObject("trayIcon.Icon")));
             this.trayIcon.Text = "Simple server (stopped)";
             this.trayIcon.Visible = true;
+            this.trayIcon.DoubleClick += new System.EventHandler(this.trayIcon_DoubleClick);
             // 
             // trayMenu
             // 
@@ -88,19 +95,20 @@
             this.toolStripSeparator2,
             this.exitTrayButton});
             this.trayMenu.Name = "trayMenu";
-            this.trayMenu.Size = new System.Drawing.Size(104, 104);
+            this.trayMenu.Size = new System.Drawing.Size(105, 104);
             this.trayMenu.ItemClicked += new System.Windows.Forms.ToolStripItemClickedEventHandler(this.trayMenu_ItemClicked);
             // 
             // openTrayButton
             // 
+            this.openTrayButton.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(204)));
             this.openTrayButton.Name = "openTrayButton";
-            this.openTrayButton.Size = new System.Drawing.Size(103, 22);
+            this.openTrayButton.Size = new System.Drawing.Size(104, 22);
             this.openTrayButton.Text = "Open";
             // 
             // exitTrayButton
             // 
             this.exitTrayButton.Name = "exitTrayButton";
-            this.exitTrayButton.Size = new System.Drawing.Size(103, 22);
+            this.exitTrayButton.Size = new System.Drawing.Size(104, 22);
             this.exitTrayButton.Text = "Exit";
             // 
             // webRootInput
@@ -114,9 +122,9 @@
             // stopButton
             // 
             this.stopButton.Enabled = false;
-            this.stopButton.Location = new System.Drawing.Point(161, 12);
+            this.stopButton.Location = new System.Drawing.Point(4, 30);
             this.stopButton.Name = "stopButton";
-            this.stopButton.Size = new System.Drawing.Size(141, 55);
+            this.stopButton.Size = new System.Drawing.Size(138, 55);
             this.stopButton.TabIndex = 0;
             this.stopButton.Text = "Stop server";
             this.stopButton.UseVisualStyleBackColor = true;
@@ -180,7 +188,7 @@
             // 
             // panel1
             // 
-            this.panel1.BackColor = System.Drawing.Color.WhiteSmoke;
+            this.panel1.BackColor = System.Drawing.Color.White;
             this.panel1.Controls.Add(this.portInput);
             this.panel1.Controls.Add(this.addressInput);
             this.panel1.Controls.Add(this.addressLabel);
@@ -192,18 +200,18 @@
             this.panel1.Controls.Add(this.rootPathLabel);
             this.panel1.Controls.Add(this.choosePHPFolderButton);
             this.panel1.Controls.Add(this.pathToPHPInput);
-            this.panel1.Location = new System.Drawing.Point(12, 73);
+            this.panel1.Location = new System.Drawing.Point(12, 107);
             this.panel1.Name = "panel1";
             this.panel1.Size = new System.Drawing.Size(290, 149);
             this.panel1.TabIndex = 10;
             // 
             // logBox
             // 
-            this.logBox.Location = new System.Drawing.Point(309, 13);
+            this.logBox.Location = new System.Drawing.Point(3, 30);
             this.logBox.Multiline = true;
             this.logBox.Name = "logBox";
             this.logBox.ScrollBars = System.Windows.Forms.ScrollBars.Vertical;
-            this.logBox.Size = new System.Drawing.Size(477, 209);
+            this.logBox.Size = new System.Drawing.Size(451, 209);
             this.logBox.TabIndex = 11;
             // 
             // contextMenuStrip1
@@ -214,25 +222,25 @@
             // startTrayButton
             // 
             this.startTrayButton.Name = "startTrayButton";
-            this.startTrayButton.Size = new System.Drawing.Size(103, 22);
+            this.startTrayButton.Size = new System.Drawing.Size(104, 22);
             this.startTrayButton.Text = "Start";
             // 
             // stopTrayButton
             // 
             this.stopTrayButton.Enabled = false;
             this.stopTrayButton.Name = "stopTrayButton";
-            this.stopTrayButton.Size = new System.Drawing.Size(103, 22);
+            this.stopTrayButton.Size = new System.Drawing.Size(104, 22);
             this.stopTrayButton.Text = "Stop";
             // 
             // toolStripSeparator1
             // 
             this.toolStripSeparator1.Name = "toolStripSeparator1";
-            this.toolStripSeparator1.Size = new System.Drawing.Size(100, 6);
+            this.toolStripSeparator1.Size = new System.Drawing.Size(101, 6);
             // 
             // toolStripSeparator2
             // 
             this.toolStripSeparator2.Name = "toolStripSeparator2";
-            this.toolStripSeparator2.Size = new System.Drawing.Size(100, 6);
+            this.toolStripSeparator2.Size = new System.Drawing.Size(101, 6);
             // 
             // portLabel
             // 
@@ -268,15 +276,55 @@
             this.portInput.TabIndex = 13;
             this.portInput.Text = "8080";
             // 
+            // panel2
+            // 
+            this.panel2.BackColor = System.Drawing.Color.White;
+            this.panel2.Controls.Add(this.logsLabel);
+            this.panel2.Controls.Add(this.logBox);
+            this.panel2.Location = new System.Drawing.Point(307, 12);
+            this.panel2.Name = "panel2";
+            this.panel2.Size = new System.Drawing.Size(457, 244);
+            this.panel2.TabIndex = 12;
+            // 
+            // logsLabel
+            // 
+            this.logsLabel.AutoSize = true;
+            this.logsLabel.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(204)));
+            this.logsLabel.Location = new System.Drawing.Point(203, 3);
+            this.logsLabel.Name = "logsLabel";
+            this.logsLabel.Size = new System.Drawing.Size(44, 20);
+            this.logsLabel.TabIndex = 9;
+            this.logsLabel.Text = "Logs";
+            // 
+            // panel3
+            // 
+            this.panel3.BackColor = System.Drawing.Color.White;
+            this.panel3.Controls.Add(this.controlLabel);
+            this.panel3.Controls.Add(this.startButton);
+            this.panel3.Controls.Add(this.stopButton);
+            this.panel3.Location = new System.Drawing.Point(12, 12);
+            this.panel3.Name = "panel3";
+            this.panel3.Size = new System.Drawing.Size(290, 89);
+            this.panel3.TabIndex = 13;
+            // 
+            // controlLabel
+            // 
+            this.controlLabel.AutoSize = true;
+            this.controlLabel.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(204)));
+            this.controlLabel.Location = new System.Drawing.Point(113, 3);
+            this.controlLabel.Name = "controlLabel";
+            this.controlLabel.Size = new System.Drawing.Size(60, 20);
+            this.controlLabel.TabIndex = 9;
+            this.controlLabel.Text = "Control";
+            // 
             // Form1
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(798, 232);
-            this.Controls.Add(this.logBox);
+            this.ClientSize = new System.Drawing.Size(780, 270);
+            this.Controls.Add(this.panel3);
+            this.Controls.Add(this.panel2);
             this.Controls.Add(this.panel1);
-            this.Controls.Add(this.stopButton);
-            this.Controls.Add(this.startButton);
             this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedSingle;
             this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
             this.MaximizeBox = false;
@@ -287,8 +335,11 @@
             this.trayMenu.ResumeLayout(false);
             this.panel1.ResumeLayout(false);
             this.panel1.PerformLayout();
+            this.panel2.ResumeLayout(false);
+            this.panel2.PerformLayout();
+            this.panel3.ResumeLayout(false);
+            this.panel3.PerformLayout();
             this.ResumeLayout(false);
-            this.PerformLayout();
 
         }
 
@@ -321,6 +372,10 @@
         private System.Windows.Forms.TextBox addressInput;
         private System.Windows.Forms.Label addressLabel;
         private System.Windows.Forms.Label portLabel;
+        private System.Windows.Forms.Panel panel2;
+        private System.Windows.Forms.Label logsLabel;
+        private System.Windows.Forms.Panel panel3;
+        private System.Windows.Forms.Label controlLabel;
     }
 }
 

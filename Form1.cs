@@ -46,8 +46,8 @@ namespace Webserver
                 stopTrayButton.Enabled = true;
                 startButton.Enabled = false;
                 startTrayButton.Enabled = false;
-                this.Text = $"Simple server (Running on {addressInput.Text}:{portInput.Text})";
-                trayIcon.Text= $"Simple server (Running on {addressInput.Text}:{portInput.Text})";
+                this.Text = $"Simple web server (Running on {addressInput.Text}:{portInput.Text})";
+                trayIcon.Text= $"Simple web server (Running on {addressInput.Text}:{portInput.Text})";
             }
             catch (Exception)
             {
@@ -65,8 +65,8 @@ namespace Webserver
                 startTrayButton.Enabled = true;
                 stopButton.Enabled = false;
                 stopTrayButton.Enabled = false;
-                this.Text = $"Simple server (Stopped)";
-                trayIcon.Text = $"Simple server (Stopped)";
+                this.Text = $"Simple web server (Stopped)";
+                trayIcon.Text = $"Simple web server (Stopped)";
                 if (serverThread.ThreadState==ThreadState.Running)
                 {
                     serverThread.Abort();
@@ -134,6 +134,12 @@ namespace Webserver
         private void Form1_FormClosing(object sender, FormClosingEventArgs e)
         {
             trayIcon.Visible = false;
+        }
+
+        private void trayIcon_DoubleClick(object sender, EventArgs e)
+        {
+            Show();
+            WindowState = FormWindowState.Normal;
         }
     }
 }
