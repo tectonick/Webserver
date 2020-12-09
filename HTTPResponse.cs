@@ -8,6 +8,7 @@ namespace Webserver
 {
     class HTTPResponse
     {
+        // Коды состояния с соответствующими поясняющими сообщениями
         readonly static Dictionary<string, string> StatusCodes = new Dictionary<string, string>()
         {
             { "200", "OK"},
@@ -20,6 +21,7 @@ namespace Webserver
         };
         public HTTPResponse() {}
         string _statusCode;
+        // При записи кода состояния поясняющее сообщение находится автоматически
         public string StatusCode { 
             get {
                 return _statusCode;
@@ -43,7 +45,7 @@ namespace Webserver
         public string Version { get; set; } = "HTTP/1.1";
         public Dictionary<string, string> Headers { get; set; } = new Dictionary<string, string>();
         public byte[] Body { get; set; }
-
+        // Поле для управления выводом бинарных данных в сокращенном виде
         public bool isBodyBinary=false;
 
 
@@ -71,6 +73,7 @@ namespace Webserver
             return result;
         }
 
+        // Перевод ответа в форму для передачи по сети
         public byte[] ToBinary()
         {
             string textResult = Version + " " + StatusCode + " " + Status + "\r\n";

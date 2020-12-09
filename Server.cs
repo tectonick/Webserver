@@ -14,14 +14,16 @@ namespace Webserver
 {
     class Server
     {
+        // Конфигурационные свойства
         public int Port { get; set; } = 8080;
         public IPAddress Address { get; set; } = IPAddress.Parse("127.0.0.1");
         public string WebRoot { get; set; } = "/";
         public string PHPFile { get; set; } = "";
 
+        // Ссылка на функцию логирования
         public delegate void Loggger(string data);
         public Loggger Log;
-
+        // Событие остановки сервера
         public delegate void Stopped();
         public event Stopped OnStop;
         public Server(IPAddress addr, int port, string root)
@@ -31,6 +33,8 @@ namespace Webserver
             WebRoot = root;
         }
         public Server() { }
+
+        //Метод запуска сервера
         public void Start()
         {
             try
@@ -72,6 +76,7 @@ namespace Webserver
             }
         }
 
+        // Метод остановки сервера
         public void Stop()
         {
             _server.Stop();
@@ -83,8 +88,10 @@ namespace Webserver
         private readonly List<string> DEFAULTEXTENSIONS = new List<string> { ".html", ".htm", ".php", "" };
         private TcpListener _server = null;
 
+        // Метод запуска интерпретатора php с параметрами для обработки POST запроса
         private string HandlePost(string pathToFile, string query)
         {
+            // Установка параметров
             ProcessStartInfo StartInfo = new ProcessStartInfo
             {
                 FileName = PHPFile,
@@ -102,6 +109,8 @@ namespace Webserver
             proc.StartInfo = StartInfo;
             string outputPHP = "";
             proc.Start();
+
+            // Запись запроса и чтение результата
             var streamWriter = proc.StandardInput;
             streamWriter.WriteLine(query);
             streamWriter.WriteLine("");
@@ -114,8 +123,10 @@ namespace Webserver
             return outputPHP;            
         }
 
+        // Метод запуска интерпретатора php с параметрами для обработки GET запроса
         private string HandleGet(string pathToFile, string query)
         {
+            // Установка параметров
             ProcessStartInfo StartInfo = new ProcessStartInfo
             {
                 FileName = PHPFile,
@@ -133,13 +144,15 @@ namespace Webserver
             proc.StartInfo = StartInfo;
             string outputPHP = "";
             proc.Start();
+
+            // Чтение результата
             while (!proc.StandardOutput.EndOfStream)
             {
                 outputPHP += proc.StandardOutput.ReadLine();
             }
             return outputPHP;
         }
-
+        //Метод для проверки пути к файлу и добавления опущенных частей пути при необходимости
         private string CheckAndParseFilename(string requestPath)
         {
             string pathToFile = requestPath;
@@ -171,12 +184,16 @@ namespace Webserver
             return (isExtensionOmitted) ? Path.Combine(WebRoot, pathToFile + opt) : Path.Combine(WebRoot, pathToFile, opt);
         }
 
+        // Метод для чтения динамического файла в ответ с пропуском через интерпретатор php
         private void handlePHP(HTTPRequest request, HTTPResponse response, string pathToFile) {
             string phpOutput = "";
+
+            //Проверка наличия php по заданному пути
             if (PHPFile == "" || (!File.Exists(PHPFile)))
             {
                 throw new FileNotFoundException();
             }
+            // Определение метода запроса
             if (request.Method == "POST")
             {
                 phpOutput = HandlePost(pathToFile, request.Body);
@@ -186,6 +203,7 @@ namespace Webserver
                 phpOutput = HandleGet(pathToFile, request.Query);
             }
 
+            // Отсоединение от телда заголовков, добавленных интерпретатором php
             string headers = "";
             int beginOfBody = phpOutput.IndexOf('<');
             if (beginOfBody >= 0)
@@ -197,6 +215,7 @@ namespace Webserver
             {
                 headers = phpOutput;
             }
+            // Проверка на предмет перенаправления
             if (headers.IndexOf("Status: 302") >= 0)
             {
                 int locationIndex = headers.IndexOf("location:") + "location:".Length;
@@ -207,9 +226,9 @@ namespace Webserver
             }
            
             response.Headers.Add("X-Powered-By", "PHP");
-            response.Headers.Add("Content-Type", "text/html");
         }
 
+        // Метод для чтения статического файла в ответ
         private void handleStatic(HTTPRequest request, HTTPResponse response, string pathToFile)
         { 
             response.Body=File.ReadAllBytes(pathToFile);
@@ -282,6 +301,7 @@ namespace Webserver
 
         private void ServeClient()
         {
+            //Инициализация и прием клиента
             TcpClient client;
             try
             {
@@ -297,27 +317,24 @@ namespace Webserver
             response.StatusCode = "200";
             try
             {
-                //Get client request
+                //Получение запроса
                 int requestLength = stream.Read(buffer, 0, buffer.Length);
                 string rawRequest = System.Text.Encoding.ASCII.GetString(buffer, 0, requestLength);
                 Log($"[{Thread.CurrentThread.ManagedThreadId}] Server received:\r\n{rawRequest}");
                 
-                //Parse request
+                //Парсинг запроса
                 HTTPRequest request = new HTTPRequest(rawRequest);
-                if ((request.Method!="POST")&&(request.Method != "GET"))
-                {
-                    throw new InvalidOperationException();
-                }
                 if (request.Version != "HTTP/1.1")
                 {
                     throw new NotSupportedException();
                 }
+                if ((request.Method!="POST")&&(request.Method != "GET"))
+                {
+                    throw new InvalidOperationException();
+                }
 
-                //Check filename and fill missing extensions or names
+                //Проверить путь к файлу и добавить опущенные части
                 string pathToFile = CheckAndParseFilename(request.Path);
-
-                //Add MIME content type header
-                AddContentTypeHeader(response, pathToFile);
 
                 // Handle filetypes
                 if (pathToFile.IndexOf(".php") >= 0)
@@ -327,6 +344,9 @@ namespace Webserver
                 {
                     handleStatic(request, response, pathToFile);
                 }
+
+                //Добавить MIME тип в заголовк Content-type
+                AddContentTypeHeader(response, pathToFile);
 
                 response.Headers.Add("Content-Length", response.Body.Length.ToString());
             }
@@ -350,9 +370,11 @@ namespace Webserver
             {
                 response.StatusCode = "500";
             }
+            // Добавление заголовков
             response.Headers.Add("Host", $"{Address.ToString()}:{Port}");
             response.Headers.Add("Server", "simple");
             response.Headers.Add("Date", DateTime.UtcNow.ToString("ddd, dd MMM yyy HH:mm:ss G'M'T"));
+            // Передача ответа клиенту
             byte[] readyResponse = response.ToBinary();
             stream.Write(readyResponse, 0, readyResponse.Length);
             stream.Close();

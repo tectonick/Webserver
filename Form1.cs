@@ -23,25 +23,26 @@ namespace Webserver
         {
             this.Invoke(new MethodInvoker(delegate ()
             {
-
                 logBox.AppendText(data + "\r\n\r\n");
-
-            }));            
+            }));           
         }
 
         private void startServer()
         {
             try
             {
+                //Инициализация сервера
                 Server server = new Server(System.Net.IPAddress.Parse(addressInput.Text), Int32.Parse(portInput.Text), webRootInput.Text);
                 server.PHPFile = pathToPHPInput.Text;
                 server.Log = this.Log;
                 server.OnStop += stopServer;
 
+                //Подготовка и запуск потока сервера
                 ThreadStart threadStart = new ThreadStart(server.Start);
                 serverThread = new Thread(threadStart);
                 serverThread.Start();
 
+                //Изменения пользовательского интерфейса
                 stopButton.Enabled = true;
                 stopTrayButton.Enabled = true;
                 startButton.Enabled = false;
@@ -61,12 +62,14 @@ namespace Webserver
         {
             this.Invoke(new MethodInvoker(delegate ()
             {
+                // Изменения пользовательского интерфейса
                 startButton.Enabled = true;
                 startTrayButton.Enabled = true;
                 stopButton.Enabled = false;
                 stopTrayButton.Enabled = false;
                 this.Text = $"Simple web server (Stopped)";
                 trayIcon.Text = $"Simple web server (Stopped)";
+                // Прерывание потока сервера
                 if (serverThread.ThreadState==ThreadState.Running)
                 {
                     serverThread.Abort();
@@ -84,8 +87,6 @@ namespace Webserver
         private void trayMenu_ItemClicked(object sender, ToolStripItemClickedEventArgs e)
         {
             var item = e.ClickedItem;
-
-
             switch (item.Text)
             {
                 case "Open":

@@ -8,16 +8,17 @@ namespace Webserver
 {
     class HTTPRequest
     {
+        // Конструктор и парсер запроса из текстовой формы
         public HTTPRequest(string data)
         {
             try
             {
                 var lines = data.Split(new[] { "\r\n" }, StringSplitOptions.None).ToList<string>();
+                // Обработка первой строки
                 string[] first = lines[0].Split(new[] { ' ' });
                 Method = first[0];
-
                 string pathAndQueryString= first[1];
-
+                // Извлечение строки запроса
                 if (pathAndQueryString.IndexOf('?')>=0)
                 {
                     string[] pathAndQueryArray = pathAndQueryString.Split(new[] { '?' });
@@ -29,9 +30,9 @@ namespace Webserver
                     Path = pathAndQueryString;
                     Query = "";
                 }
-
                 Version = first[2];
-                int endOfHeaders = lines.IndexOf("");
+                // Получение заголовков
+                int endOfHeaders = lines.IndexOf(""); // Тело отделяется от заголовков пустой строкой
                 for (int i = 1; i < endOfHeaders; i++)
                 {
                     string[] line = lines[i].Split(new[] { ':' });
@@ -41,6 +42,7 @@ namespace Webserver
                     }
                     Headers.Add(line[0], line[1].Trim());
                 }
+                // Получение тела
                 Body = "";
                 for (int i = endOfHeaders + 1; i < lines.Count; i++)
                 {
